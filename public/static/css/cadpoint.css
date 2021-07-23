@@ -1,0 +1,35 @@
+@charset "utf-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+
+body { font-family: 'Ubuntu', sans-serif; }
+
+h1, h2, h3, h4, h5, h6 {color: indigo}
+
+header > .navbar > .container > a.navbar-brand > img,
+header.rastopiir > .container > a.navbar-brand > img  { height: 42px; margin: 1ex 0; }
+header > .navbar > .container > .navbar-nav > .nav-item > a {
+  font-size: 16px; line-height: 16px;
+  vertical-align: middle;
+  color: #008DD2;
+  text-decoration: none;
+  padding: 4px 1px;
+  margin: 0 20px;
+  display: inline-block;
+  border-bottom: solid 2px #008DD2;
+  transition: background-position 0.2s;
+  white-space: nowrap;
+}
+header > .navbar > .container > .navbar-nav > .nav-item > a:hover {
+  color: black; border-bottom: solid 2px black; transition: 0.8s; padding: 4px 15px; margin: 0 6px;
+}
+header > .navbar > .container > .navbar-nav > .nav-item > a:not(hover) { transition: 2.5s; }
+header > .navbar > .container > .navbar-nav > .nav-item > form > .input-group  > input {
+  border: solid 1px #008DD2; border-right: none; margin-left: 16px;
+  height: 31px; border-radius: 6px 0 0 6px;
+}
+header > .navbar > .container > .navbar-nav > .nav-item > form > .input-group  > .input-group-append > button {
+  border: solid 1px #008DD2; border-left: none; background: none;
+  height: 31px; border-radius: 0 6px 6px 0;
+}
+header.rastopiir { height: 112px; z-index: 1; background: white; position: relative;}

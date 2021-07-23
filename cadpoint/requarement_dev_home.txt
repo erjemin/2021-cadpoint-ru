@@ -1,0 +1,5 @@
+asgiref==3.4.1
+Django==3.2.5
+mysqlclient @ file:///M:/cloud-mail.ru/PRJ/PRJ_CADpoint2/mysqlclient-1.4.6-cp39-cp39-win_amd64.whl
+pytz==2021.1
+sqlparse==0.4.1

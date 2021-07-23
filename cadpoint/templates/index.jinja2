@@ -1,0 +1,40 @@
+{% extends "base.jinja2" %}{% load static %}
+
+{% block META_OG %}{% comment %} РАЗМЕТКА Open Graph ДЛЯ СОЦ-СЕТЕЙ
+  подробности: https://habr.com/ru/company/macloud/blog/555082/{% endcomment %}
+  <meta property="og:title" content="Главная страница - RSVO.RU">{% comment %} Уникальное название страницы.
+   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook{% endcomment %}
+  <meta property="og:description" content="RSVO.RU: Строительство и эксплуатация разноуровневых систем оповещения" />{% comment %} Уникальное описание страницы.
+   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook.{% endcomment %}
+  <meta property="og:image" content="{% static 'img/og-cadpoint-default.png' %}" />{% comment %} Изображение, отображаемое, когда вы
+   делитесь ссылкой на страницу в социальных сетях, приложениях чата или других сайтах,
+   которые очищают URL-адреса.
+   В идеале это должно быть квадратное изображение с важным содержанием, размещенным
+   в центре квадрата в прямоугольнике с соотношением сторон 2:1. Это гарантирует,
+   что изображение будет хорошо смотреться на карточках с изображениями прямоугольной
+   и квадратной формы.{% endcomment %}
+  <meta property="og:image:alt" content="cadpint.ru: новости 3D-печати и Систем Автоматичекого Проектирования" />{% comment %}
+   Описание изображения.
+   Не используйте этот метатег, если изображение носит чисто декоративный характер
+   и не содержит значимой информации. Программы чтения с экрана игнорируют
+   изображение, если мы предоставлен замещающий текст.{% endcomment %}
+  <meta property="og:locale" content="ru_RU" />{% comment %}  Естественный язык страницы.{% endcomment %}
+  <meta property="og:type" content="website" />{% comment %} Тип контента, которым вы делитесь,
+   например website, article, или video.movie{% endcomment %}
+  <meta property="og:url" content="https://cadpoiny.ru" />{% comment %} Канонический URL страницы.
+   Обязательное свойство для допустимых страниц Open Graph.{% endcomment %}
+  <meta name="twitter:card" content="summary_large_image" />{% comment %} определяет, как будут выглядеть
+   карточки при публикации в Twitter. Есть два варианта для веб-сайтов: summary
+   и summary_large_image{% endcomment %}{% endblock %}
+
+<!--- ТИТУЛ --->
+{% block Title %}Главная страница{% endblock %}
+{% block Description %}ФГУП Российские сети вещания и оповещения: Строительство и эксплуатация разноуровневых систем оповещения{% endblock %}
+{% block Keywords %}ФГУП РСВО, российские сети вещания и оповещения, системы оповещения{% endblock %}
+
+{% block CONTENT %}
+<h1><br /><br /><br /><br /><br /><br /><br /><br />ЛЯ-ЛЯ</h1>
+{% endblock %}
+
+{% block Top_JS1 %}<script type="text/javascript">
+  </script>{% endblock %}
