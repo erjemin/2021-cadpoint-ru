@@ -4,10 +4,34 @@ from django.db import models
 from django.utils.timezone import now
 from filer.fields.image import FilerFileField
 from ckeditor.fields import RichTextField
+from taggit.managers import TaggableManager
+from taggit.models import Tag, TaggedItem
+
+import web.models
 from web.add_function import safe_html_special_symbols
 import urllib3
 import pytils
 import random
+import datetime
+
+
+# класс для транслитерации русскоязычных slug
+# рецепт взят отсюда: https://timonweb.com/django/russian-slugs-for-django-taggit/
+class RuTag(Tag):
+    class Meta:
+        proxy = True
+
+    def slugify(self, tag, i=None):
+        return pytils.translit.slugify(self.name.lower())[:128]
+
+
+class RuTaggedItem(TaggedItem):
+    class Meta:
+        proxy = True
+
+    @classmethod
+    def tag_model(cls):
+        return RuTag
 
 
 # Create your models here.
@@ -38,10 +62,22 @@ class TbContent(models.Model):
                   " и&nbsp;&laque;Следующий&raque; по ленте. По прямому URL (если его знать) "
                   "отображается даже не опубликованный контент (но без навигации)."
     )
-    tdContentPublishStart = models.DateField(
+    tdContentPublishUp = models.DateTimeField(
         db_index=True,  default=now,   # datetime.date.today(),
-        verbose_name="Дата публикации",
+        verbose_name="Начало публикации",
         help_text=u"Дата публикации, с её момента новость появится на сайте."
+    )
+    tdContentPublishDown = models.DateTimeField(
+        db_index=True, default=0,   # datetime.datetime(0, 0, 0, 0, 0, 0, 0),
+        verbose_name="Окончания публикации",
+        help_text=u"Дата окончания публикации, с её момента новость исчезнет с сайта."
+    )
+    tags = TaggableManager(
+        blank=True,
+        through=RuTaggedItem,   # uTaggedItem,
+        verbose_name=u"Теги",
+        help_text=u"Теги через запятую… Регистр не чувствителен… Длинные теги, содержащие пробел, заключайте"
+                  u"'в кавычки'… <b>Теги нужны для присвоения категорий объектам контента<b>."
     )
     szContentHead = models.CharField(
         max_length=512, default=u"", blank=False, null=False,
@@ -74,6 +110,11 @@ class TbContent(models.Model):
         verbose_name="Slug",
         help_text="Слуг… 128 символов.<br /><small><b>Если оставить"
                   " пустым, то slug сформируется автоматически</b></small>"
+    )
+    iContentHits = models.PositiveIntegerField(
+        default=0, db_index=True,
+        verbose_name="◉",
+        help_text="Число просмотров"
     )
     bTypograf = models.BooleanField(
         default=False,
@@ -114,9 +155,8 @@ class TbContent(models.Model):
     )
 
     def __unicode__(self):
-        return u"%03d: %s (%s)" % (self.id,
-                                   self.szContentHead[:30] + "…" if len(self.szContentHead) > 30 else self.szContentHead,
-                                   str(self.kCategory)[:15] + "…" if len(str(self.kCategory)) > 15 else self.kCategory)
+        return u"%03d: %s" % (self.id,
+                              self.szContentHead[:30] + "…" if len(self.szContentHead) > 30 else self.szContentHead)
 
     def __str__(self):
         result = safe_html_special_symbols(self.szContentHead)
@@ -126,9 +166,9 @@ class TbContent(models.Model):
         # переопределяем метод save() чтобы "проверуть" тексты через типографы...
         if self.szContentSlug is None or " " in self.szContentSlug:
             result_slug = pytils.translit.slugify(
-                safe_html_special_symbols(self.szContentSlug)).lower()
+                safe_html_special_symbols(self.szContentHead)).lower()
             while TbContent.objects.filter(szContentSlug=result_slug).count() != 0:
-                result_slug = "%s-%x" % (result_slug, int(random.uniform(0, 255)))
+                result_slug = "%s-%x" % (result_slug[0: -3], int(random.uniform(0, 255)))
             self.szPointSlug = result_slug
         if self.bTypograf:
             # Используем типограф Eugene Spearance (https://www.typograf.ru) через API
@@ -161,8 +201,8 @@ class TbContent(models.Model):
                                                    '	<hanging-line delete="1" />'
                                                    '	<!-- Переносы  слов длиннее 12 знаков -->'
                                                    '	<hyphen insert="1" length="12" />'
-                                                   '	<!-- Акронимы РАССТАВЛЯЕМ -->'
-                                                   '	<acronym insert="1"></acronym>'
+                                                   '    <!-- Параметры ссылок -->'
+                                                   '	<link target="_blank" />'
                                                    '</preferences>'.encode('cp1251')})
                 self.szContentIntro = resp.data.decode('cp1251')
                 resp = http.request("POST", "https://www.typograf.ru/webservice/",
@@ -173,10 +213,8 @@ class TbContent(models.Model):
                                                    '	<hanging-punct insert="1" />'
                                                    '	<!-- Висячие слова УДАЛЯЕМ -->'
                                                    '	<hanging-line delete="1" />'
-                                                   '	<!-- Переносы  слов длиннее 12 знаков -->'
+                                                   '	<!-- Переносы  слов длиннее 10 знаков -->'
                                                    '	<hyphen insert="1" length="12" />'
-                                                   '	<!-- Акронимы РАССТАВЛЯЕМ -->'
-                                                   '	<acronym insert="1"></acronym>'
                                                    '    <!-- Параметры ссылок -->'
                                                    '	<link target="_blank" />'
                                                    '</preferences>'.encode('cp1251')})
@@ -189,4 +227,4 @@ class TbContent(models.Model):
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = u"Контент"
-        ordering = ['-tdContentPublishStart', ]
+        ordering = ['-tdContentPublishUp', ]

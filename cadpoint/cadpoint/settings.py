@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'mptt.apps.MpttConfig',
     # # 'ckeditor_uploader',
     'ckeditor',
+    'taggit.apps.TaggitAppConfig',
     'web.apps.WebConfig',
 ]
 
