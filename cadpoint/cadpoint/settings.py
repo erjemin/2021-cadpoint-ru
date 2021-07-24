@@ -58,11 +58,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'easy_thumbnails',
-    # 'filer.apps.FilerConfig',
-    # 'mptt.apps.MpttConfig',
+    'easy_thumbnails',
+    'filer.apps.FilerConfig',
+    'mptt.apps.MpttConfig',
     # # 'ckeditor_uploader',
-    # 'ckeditor',
+    'ckeditor',
     'web.apps.WebConfig',
 ]
 
@@ -238,6 +238,9 @@ else:
         }
     }
 
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_USE_TLS = True
+EMAIL_SUBJECT_PREFIX = '[DIC-QUO ERR]: '  # префикс для оповещений об ошибках и необработанных исключениях
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

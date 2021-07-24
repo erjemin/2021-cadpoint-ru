@@ -33,6 +33,5 @@ def index(request) -> render:
     :return:  response:
     """
     template = "index.jinja2"  # шаблон
-    template = "under_reconstruction.jinja2"  # шаблон
     to_template = {"COOKIES": check_cookies(request)}
     return render(request, template, to_template)
