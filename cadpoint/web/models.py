@@ -68,7 +68,7 @@ class TbContent(models.Model):
         help_text=u"Дата публикации, с её момента новость появится на сайте."
     )
     tdContentPublishDown = models.DateTimeField(
-        db_index=True, default=0,   # datetime.datetime(0, 0, 0, 0, 0, 0, 0),
+        db_index=True, null=True, blank=True, # default=datetime.datetime(2035, 12, 31, 23, 59, 59, 0), # default=0,
         verbose_name="Окончания публикации",
         help_text=u"Дата окончания публикации, с её момента новость исчезнет с сайта."
     )
@@ -121,12 +121,12 @@ class TbContent(models.Model):
         verbose_name="Типограф Стандарт",
         help_text="Обработать через <a href=\"https://www.typograf.ru\""
                   " target=\"_blank\">Типограф 2.0</a><br />"
-                  "<small><b>НОРМАЛЬНЫЙ ТИПОГРАФ, ХОРОШИЙ HTML, РЕКОМЕНДУЕМ</b><br />"
-                  "&laquo;приклеивает&raquo; союзы, поддерживает неразрывные конструкции,<br />"
-                  "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo;<br />"
-                  "в словах длиннее 12 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме<br />"
-                  "заголовков), расставляет абзацы (кроме заголовков), расшифро-<br />"
-                  "вывает аббревиатуры (те, что знает и кроме заголовков), висячая<br />"
+                  "<small><b>НОРМАЛЬНЫЙ ТИПОГРАФ, ХОРОШИЙ HTML, РЕКОМЕНДУЕМ</b> "
+                  "&laquo;приклеивает&raquo; союзы, поддерживает неразрывные конструкции, "
+                  "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo; "
+                  "в словах длиннее 12 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
+                  "заголовков), расставляет абзацы (кроме заголовков), расшифровывает "
+                  "аббревиатуры (те, что знает и кроме заголовков), висячая "
                   "пунктуация (только в заголовках) и т.п.</small>"
     )
     szContentKeywords = models.CharField(
@@ -219,6 +219,7 @@ class TbContent(models.Model):
                                                    '	<link target="_blank" />'
                                                    '</preferences>'.encode('cp1251')})
                 self.szContentBody = resp.data.decode('cp1251')
+                self.bTypograf = False
             except:
                 self.bTypograf = False
 
