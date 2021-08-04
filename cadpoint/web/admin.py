@@ -22,9 +22,14 @@ class AdminContent(admin.ModelAdmin):
     # Настройка страницы редактирования
     fieldsets = [
         (None, {
-            'fields': ('bContentPublish', 'tdContentPublishUp', 'tdContentPublishDown', 'tags',
-                       'szContentHead', 'imgContentPreview', 'szContentIntro',
-                       'szContentBody')
+            'fields': ('bContentPublish', 'tdContentPublishUp')
+        }),
+        ('Окончание публикации', {
+            'fields': ('tdContentPublishDown',),
+            'classes': ('collapse',),
+        }),
+        (None, {
+            'fields': ('tags', 'szContentHead', 'imgContentPreview', 'szContentIntro', 'szContentBody')
         }),
         ('Типограф', {
             'fields': ('bTypograf', ),

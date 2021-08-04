@@ -164,12 +164,13 @@ class TbContent(models.Model):
 
     def save(self, *args, **kwargs):
         # переопределяем метод save() чтобы "проверуть" тексты через типографы...
-        if self.szContentSlug is None or " " in self.szContentSlug:
+        if self.szContentSlug is None or self.szContentSlug == "" or " " in self.szContentSlug:
+            print("ку-ку", self.szContentHead)
             result_slug = pytils.translit.slugify(
                 safe_html_special_symbols(self.szContentHead)).lower()
             while TbContent.objects.filter(szContentSlug=result_slug).count() != 0:
                 result_slug = "%s-%x" % (result_slug[0: -3], int(random.uniform(0, 255)))
-            self.szPointSlug = result_slug
+            self.szContentSlug = result_slug
         if self.bTypograf:
             # Используем типограф Eugene Spearance (https://www.typograf.ru) через API
             # Настройки стиля типографики см. тут: https://www.typograf.ru/webservice/about/
