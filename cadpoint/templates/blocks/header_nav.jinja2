@@ -3,7 +3,7 @@
       <div class="container">
         <a class="navbar-brand my-0" href="/"><img src="{% static 'svgs/logo_cadpoint-2021.svg' %}" alt="CADpoint.ru." title="На главную страницу" /></a>
         <ul class="navbar-nav float-right">
-          <li class="nav-item"><a href="/tags">Теги</a></li>
+          <li class="nav-item"><a href="/alltags">Теги</a></li>
           <li class="nav-item d-none d-xl-block">
             <form class="form-inline"><div class="input-group">
               <input type="text" class="form-control form-control-sm" placeholder="Поиск по сайту" aria-label="Поиск по сайту">
@@ -13,12 +13,5 @@
       </ul>
       </div>
     </nav>
-  </header>
-  {# <!-- ШАПКА: КОНЕЦ --> #}{% comment %}
-  <!-- АЛЬТЕРНАТИВНАЯ ШАПКА ДЛЯ МОБИЛЬНЫХ: НАЧАЛО -->
-  <header class="rastopiir">
-    <nav class="container shadow-lg navbar d-sm-none py-0">
-      <a class="navbar-brand my-0 " href="/"><img src="{% static 'svgs/logo_cadpoint-2021.svg' %}" alt="CADpoint.ru." title="На главную страницу" /></a>
-    </nav>
-  </header>
-  <!-- АЛЬТЕРНАТИВНАЯ ШАПКА ДЛЯ МОБИЛЬНЫХ: КОНЕЦ -->{% endcomment %}
+  </header>{# <!-- ШАПКА: КОНЕЦ --> #}
+  {# <!-- РАСТОПЫРКА: НАЧАЛО --> #}<header class="rastopiir"></header>{# <!-- РАСТОПЫРКА: КОНЕЦ --> #}
