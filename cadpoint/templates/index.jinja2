@@ -1,4 +1,4 @@
-{% extends "base.jinja2" %}{% load static %}
+{% extends "base.jinja2" %}{% load static %}{% load thumbnail %}{% load slug_ru %}
 
 {% block META_OG %}{% comment %} РАЗМЕТКА Open Graph ДЛЯ СОЦ-СЕТЕЙ
   подробности: https://habr.com/ru/company/macloud/blog/555082/{% endcomment %}
@@ -29,11 +29,62 @@
 
 <!--- ТИТУЛ --->
 {% block Title %}Главная страница{% endblock %}
+{% block canonical %}https://rsvo.ru/{{ ITEM.iPointType }}/{{ ITEM.szPointSlug }}{% if LIST and PAGE_OF_LIST != 0 %}/p{{ PAGE_OF_LIST }}{% endif %}{% endblock %}
 {% block Description %}ФГУП Российские сети вещания и оповещения: Строительство и эксплуатация разноуровневых систем оповещения{% endblock %}
 {% block Keywords %}ФГУП РСВО, российские сети вещания и оповещения, системы оповещения{% endblock %}
+{% block Date4Meta %}{{ NEWS.0.tdContentPublishStart|date:'Y-m-d 08:30:00' }}{% endblock %}"
+{% block Last4Meta %}{{ NEWS.0.dtContentTimeStamp|date:'Y-m-d H:i:s' }}{% endblock %}"
+{% block Expires4Meta %}{% now 'Y-m-d H:i:s' %}{% endblock %}"
 
-{% block CONTENT %}
-<h1><br /><br /><br /><br /><br /><br /><br /><br />ЛЯ-ЛЯ</h1>
+
+{% block CONTENT %}{#  <!-- ХЛЕБНЫЕ КРОШКИ: НАЧАЛО -->#}
+  <div class="container bread-crumb">
+    <div class="row">
+      <nav  class="col-12 х" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% if FIRST %}
+          <li class="breadcrumb-item nw s"><a href="/{{ ITEM.iPointType }}/">{{ ITEM.get_iPointType_display }}</a></li>{% if TEMPLATE_CONTENT and not HIDE_PAGE %}
+          <li class="breadcrumb-item nw s"><a href="/{{ ITEM.iPointType }}/{{ ITEMnakamichi.szPointSlug }}">{{ ITEM.szPointHead|safe }}</a></li>
+          <li class="breadcrumb-item active nw s" aria-current="page">Стр. {{ PAGE_OF_LIST|add:"1" }} ({% for i in LIST reversed %}{% if forloop.first %}{{ i.tdContentPublishStart|date:'d F Y' }}{% endif %}{% if forloop.last %} &mdash; {{ i.tdContentPublishStart|date:'d F Y' }}{% endif %}{% endfor %})</li>{% else %}
+          <li class="breadcrumb-item active nw s" aria-current="page">{{ ITEM.szPointHead|safe }}</li>{%  endif %}{% endif %}
+        </ol>
+      </nav>
+    </div>
+  </div>{#<!-- ХЛЕБНЫЕ КРОШКИ: КОНЕЦ -->#}
+  {#<!-- POINT-СРАНИЦА: НАЧАЛО -->#}<div class="container lenta">
+    <div class="row">
+      <div class="col-12 col-md-9">
+        {% for i in LENTA %}<div class="row default-list">
+          <div class="col-md-4 d-none d-md-block{% if forloop.counter|divisibleby:2 %} order-last{% endif %}">
+            <a href="/news/1-latest-news/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{% if i.imgContentPreview is None %}
+              <img src="{% static 'img/og-cadpoint-default.png' %}"
+                   alt="{{ i.szContentHead|safe_html_ss }}"
+                   title="{{ i.szContentHead|safe_html_ss }}" />{% else %}
+              <img srcset="{% thumbnail i.imgContentPreview 340x340 upscale %} 640w, {% thumbnail i.imgContentPreview 680x680 upscale %} 1200w"
+                   sizes="(min-width: 1024px) 1200px, (min-width: 320px) 640px, 100vw"
+                   src="{% thumbnail i.imgContentPreview 680x680 upscale %}"
+                   alt="{{ i.szContentHead|safe_html_ss }}"
+                   title="{{ i.szContentHead|safe_html_ss }}" />{% endif %}</a>
+          </div>
+          <div class="col-12 col-md-8">
+            <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }} <small>({{ i.tdContentPublishUp|date:'l'|lower }})</small></time>
+            <h3><a href="/news/1-latest-news/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:"50" }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{{ i.szContentHead|safe }}</a></h3>
+            <nav class="sm-tags">{% for t in i.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag"></i> {{ t.name }}</a> &nbsp;  &#8198; {% endfor %}</nav>
+            {{ i.szContentIntro|safe }}
+            <p class="next"><a href="item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">Читать дальше &rarr;</a></p>
+          </div>
+        </div>{% endfor %}
+
+
+      </div>
+      {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first l-menu">
+        <h6>Теги текущей страницы:</h6>
+        {% include "blocks/tags-cloud.jinja2" %}
+      </nav>{#<!-- боковая навигация: конец-->#}
+    </div>
+  </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}
+
+
 {% endblock %}
 
 {% block Top_JS1 %}<script type="text/javascript">

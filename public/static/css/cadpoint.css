@@ -1,12 +1,16 @@
 @charset "utf-8";
 
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css');
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Ubuntu+Condensed&display=swap');
 
 body { font-family: 'Ubuntu', sans-serif; }
 
-h1, h2, h3, h4, h5, h6 {color: indigo}
+h1, h2, h3, h4, h5, h6 {color: #006799; font-family: 'Ubuntu Condensed', sans-serif;}
+a { color: #006799; text-decoration: none; border-bottom: 1px dotted #006799; }
+a:hover { color: #008DD2; border-bottom: 1px solid #008DD2; transition:0.6s; }
+a:not(hover) { transition:1.2s; }
 
+header > .navbar {background-color: white}
 header > .navbar > .container > a.navbar-brand > img,
 header.rastopiir > .container > a.navbar-brand > img  { height: 42px; margin: 1ex 0; }
 header > .navbar > .container > .navbar-nav > .nav-item > a {
@@ -33,4 +37,220 @@ header > .navbar > .container > .navbar-nav > .nav-item > form > .input-group  >
   border: solid 1px #008DD2; border-left: none; background: none;
   height: 31px; border-radius: 0 6px 6px 0;
 }
-header.rastopiir { height: 112px; z-index: 1;}
+header.rastopiir { height: 82px; z-index: 1;}
+
+/****************************
+** ОФОРМЛЕНИЕ ЛЕНТЫ *********
+****************************/
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > a > img,
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > img,
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > iframe {
+  width: 100%;
+  border: solid #006799 1px;
+  border-radius: 4px;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > a:hover > img {
+  border: solid #008DD2 1px;
+  transition:0.6s;
+  animation-name: scaleUpDown;
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out; -webkit-animation-timing-function: ease-in-out;
+  visibility: visible !important;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > time {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  color: #888888;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a {
+  color: #006799;
+  text-decoration: none;
+  border-bottom: 1px dotted #006799;
+  font-weight: 500;
+  font-size: 130%;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags { margin-bottom: 2ex; }
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  font-size: smaller;
+  display: inline-block;
+  color: #006799;
+  text-decoration: none;
+  border-bottom: 1px dotted #006799;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a:hover,
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover {
+  color: #008DD2;
+  border-bottom: 1px solid #008DD2;
+  transition:0.6s;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover {
+  animation-name: scaleUpDown2;
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out; -webkit-animation-timing-function: ease-in-out;
+  visibility: visible !important;
+}
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p {
+  font-family: 'Ubuntu', sans-serif;
+  color: black;
+}
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > img,
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > iframe {
+  border-bottom: solid white 12px;
+  border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
+}
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p.next > a {
+  letter-spacing: 0.2ex;
+}
+div.lenta > div.row > div[class^="col"] > div.row {
+  border-bottom: 1px gray dashed;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+}
+
+@keyframes scaleUpDown {
+    0% { transform: scale(1); }
+    25% { transform: scale(0.98); }
+    75% { transform:scale(1.02); }
+    80% { transform: rotate(1deg); }
+    85% { transform: rotate(-1deg); }
+    90% { transform: rotate(1deg); }
+    95% { transform: rotate(-2deg); }
+    100%{ transform: translateX(1); }
+}
+@keyframes scaleUpDown2 {
+    0% { transform: scale(1); }
+    25% { transform: scale(0.96); }
+    75% { transform:scale(1.04); }
+    80% { transform: rotate(2deg); }
+    85% { transform: rotate(-2deg); }
+    90% { transform: rotate(2deg); }
+    95% { transform: rotate(-4deg); }
+    100%{ transform: translateX(1); }
+}
+/****************************
+** ОФОРМЛЕНИЕ ТЕГОВ *********
+****************************/
+.tags {font-family: 'Ubuntu Condensed', sans-serif; }
+.tags > a {
+  display: inline-block;
+  margin: 0.5ex 1ex 0.5ex 0.9ex;
+  padding: 0.5ex 0 0.5ex 1.5ex;
+  white-space: nowrap;
+  position: relative;
+  font-family: 'Ubuntu Condensed', sans-serif;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-radius: 0 0.8ex 0.8ex 0;
+}
+/* активные теги (с ненулевой представленностью на странице) цветные */
+.tags > a.tag-active {
+  color: #eee;
+  background: -moz-linear-gradient(top, #85CCF1 0%, #008DD2 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#85CCF1), color-stop(100%,#008DD2));
+  background: -webkit-linear-gradient(top, #85CCF1 0%,#008DD2 100%);
+  background: -o-linear-gradient(top, #85CCF1 0%,#008DD2 100%);
+  background: linear-gradient(to bottom, #85CCF1 0%,#008DD2 100%);
+  background-color: #008DD2;
+}
+/* активные теги (с ненулевой представленностью на странице) цветные */
+.tags > a.tag-active-current {
+  color: #fff;
+  background: -moz-linear-gradient(top, #e86ad9 0%, #e86a79 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e86ad9), color-stop(100%,#e86a79));
+  background: -webkit-linear-gradient(top, #e86ad9 0%,#e86a79 100%);
+  background: -o-linear-gradient(top, #e86ad9 0%,#e86a79 100%);
+  background: linear-gradient(to bottom, #e86ad9 0%,#e86a79 100%);
+  background-color: #e86aa9;
+}
+/* неактивные теги (с нулевой представленностью на странице) серые */
+.tags > a.tag-not-active {
+  color: #000;
+  font-size: small;
+  background: -moz-linear-gradient(top, #ccc 0%, #888 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ccc), color-stop(100%,#888));
+  background: -webkit-linear-gradient(top, #ccc 0%,#888 100%);
+  background: -o-linear-gradient(top, #ccc 0%,#888 100%);
+  background: linear-gradient(to bottom, #ccc 0%,#888 100%);
+  background-color: #aaa;
+}
+/* левые треугольный хвостик тега */
+.tags > a:before {
+  content: '';
+  position: absolute;
+  top: 1ex;
+  left: -0.9ex;
+  width: 1.8ex;
+  height: 1.8ex;
+  border-radius: 0 1ex 0 1ex;
+  -webkit-transform: scale(1, 1.5) rotate(45deg);
+  -moz-transform: scale(1, 1.5) rotate(45deg);
+  -ms-transform: scale(1, 1.5) rotate(45deg);
+  transform: scale(1, 1.5) rotate(45deg);
+}
+/* левые треугольные хвостики активного тега (с ненулевой представленностью на странице) цветные */
+.tags > a.tag-active:before {
+  background: -moz-linear-gradient(45deg, #85CCF1 0%, #008DD2 100%);
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#85CCF1), color-stop(100%,#008DD2));
+  background: -webkit-linear-gradient(-45deg, #85CCF1 0%,#008DD2 100%);
+  background: -o-linear-gradient(45deg, #85CCF1 0%,#008DD2 100%);
+  background: linear-gradient(135deg, #85CCF1 0%,#008DD2 100%);
+  background-color: #008DD2;
+}
+/* левые треугольные хвостики активного тега (с ненулевой представленностью на странице) цветные */
+.tags > a.tag-active-current:before {
+  background: -moz-linear-gradient(45deg, #e86ad9 0%, #e86a79 100%);
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#e86ad9), color-stop(100%,#e86a79));
+  background: -webkit-linear-gradient(-45deg, #e86ad9 0%,#e86a79 100%);
+  background: -o-linear-gradient(45deg, #e86ad9 0%,#e86a79 100%);
+  background: linear-gradient(135deg, #e86ad9 0%,#e86a79 100%);
+  background-color: #e86aa9;
+}
+/* левые треугольные хвостики не активного тега (с ненулевой представленностью на странице) серые */
+.tags > a.tag-not-active:before {
+  background: -moz-linear-gradient(45deg, #ccc 0%, #888 100%);7
+  background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ccc), color-stop(100%,#888));
+  background: -webkit-linear-gradient(-45deg, #ccc 0%,#888 100%);
+  background: -o-linear-gradient(45deg, #ccc 0%,#888 100%);
+  background: linear-gradient(135deg, #ccc 0%,#888 100%);
+  background-color: #aaa;
+}
+/* правые цыфровые поля тега */
+.tags > a .tag-note {
+  padding:  1ex;
+  background-color: rgba(255,255,255,0.3);
+  border-radius: 0 0.8ex 0.8ex 0;
+  border-left: 1px dotted white;
+}
+.tags > a.tag-active .tag-note { color: #ccc; }
+.tags > a.tag-active-current .tag-note { color: #fee; }
+.tags > a.tag-not-active .tag-note { color: #333; }
+/* дырочка в левом хвостике */
+.tags > a:after {
+  content: '';
+  position: absolute;
+  top: 1.6ex;
+  left: 0;
+  width: 0.6ex;
+  height: 0.6ex;
+  background: #FFF;
+  border-radius: 0.4ex;
+}
+/* поведение при наведении на ссылку */
+.tags > a:hover { transition:0.5s; }
+.tags > a.tag-active:hover { color: #fff; }
+.tags > a.tag-not-active:hover { color: #000; }
+.tags > a:hover .tag-note { background-color: rgba(255,255,255,0.7); transition:0.5s;
+}
+.tags > a.tag-active:hover .tag-note { color: #008DD2; }
+.tags > a.tag-not-active:hover .tag-note { color: #008DD2; }
+.tags > a:not(:hover), .tags > a:not(:hover) .tag-note { transition:1s; }
+
+/****************************
+** ОФОРМЛЕНИЕ ТЕГОВ *********
+****************************/
+.label > a {color: white}
+.on-light {background-color:#bc9ec5;transition:all 0.5s ease-out 0.5s; }
+
+.test {
+  position: absolute;top:200px;
+}

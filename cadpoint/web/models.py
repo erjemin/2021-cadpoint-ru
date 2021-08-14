@@ -68,7 +68,7 @@ class TbContent(models.Model):
         help_text=u"Дата публикации, с её момента новость появится на сайте."
     )
     tdContentPublishDown = models.DateTimeField(
-        db_index=True, null=True, blank=True, # default=datetime.datetime(2035, 12, 31, 23, 59, 59, 0), # default=0,
+        db_index=True, null=True, blank=True,  # default=datetime.datetime(2035, 12, 31, 23, 59, 59, 0), # default=0,
         verbose_name="Окончания публикации",
         help_text=u"Дата окончания публикации, с её момента новость исчезнет с сайта."
     )
@@ -165,7 +165,7 @@ class TbContent(models.Model):
     def save(self, *args, **kwargs):
         # переопределяем метод save() чтобы "проверуть" тексты через типографы...
         if self.szContentSlug is None or self.szContentSlug == "" or " " in self.szContentSlug:
-            print("ку-ку", self.szContentHead)
+            # print("ку-ку", self.szContentHead)
             result_slug = pytils.translit.slugify(
                 safe_html_special_symbols(self.szContentHead)).lower()
             while TbContent.objects.filter(szContentSlug=result_slug).count() != 0:

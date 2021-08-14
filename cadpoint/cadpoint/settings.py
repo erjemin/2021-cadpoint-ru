@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     # # 'ckeditor_uploader',
     'ckeditor',
     'taggit.apps.TaggitAppConfig',
+    # 'fontawesome-free'
     'web.apps.WebConfig',
 ]
 
@@ -215,7 +216,13 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
             # 'OPTIONS': { 'autocommit': True, }
         }
     }
-
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
+    INSTALLED_APPS += ['debug_toolbar', ]
+    INTERNAL_IPS = ['127.0.0.1', '192.168.1.30']
+    # this is the main reason for not showing up the toolbar
+    import mimetypes
+    mimetypes.add_type("application/javascript", ".js", True)
+    DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
 else:
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
     STATIC_ROOT = MY_STATIC_ROOT_PROD
