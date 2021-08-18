@@ -9,8 +9,13 @@ h1, h2, h3, h4, h5, h6 {color: #006799; font-family: 'Ubuntu Condensed', sans-se
 a { color: #006799; text-decoration: none; border-bottom: 1px dotted #006799; }
 a:hover { color: #008DD2; border-bottom: 1px solid #008DD2; transition:0.6s; }
 a:not(hover) { transition:1.2s; }
+.s  { font-size: small; }
+.x  { font-size: x-small; }
+.xx { font-size: xx-small; }
+.nw { white-space: nowrap; }
 
 header > .navbar {background-color: white}
+header > .navbar > .container > a.navbar-brand { border-bottom: none }
 header > .navbar > .container > a.navbar-brand > img,
 header.rastopiir > .container > a.navbar-brand > img  { height: 42px; margin: 1ex 0; }
 header > .navbar > .container > .navbar-nav > .nav-item > a {
@@ -38,6 +43,14 @@ header > .navbar > .container > .navbar-nav > .nav-item > form > .input-group  >
   height: 31px; border-radius: 0 6px 6px 0;
 }
 header.rastopiir { height: 82px; z-index: 1;}
+
+/****************************
+** ОФОРМЛЕНИЕ ХЛЕБНЫХ КРОШЕК *********
+****************************/
+div.bread-crumb > div.row > nav[class^="col"] > ol.breadcrumb {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  margin-bottom: 2em !important;
+}
 
 /****************************
 ** ОФОРМЛЕНИЕ ЛЕНТЫ *********
@@ -69,7 +82,8 @@ div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a {
   font-size: 130%;
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags { margin-bottom: 2ex; }
-div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a {
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a,
+div.news > div.row > div[class^="col"] > nav.sm-tags > a {
   font-family: 'Ubuntu Condensed', sans-serif;
   font-size: smaller;
   display: inline-block;
@@ -78,12 +92,14 @@ div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tag
   border-bottom: 1px dotted #006799;
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a:hover,
-div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover {
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover,
+div.news > div.row > div[class^="col"] > nav.sm-tags > a:hover {
   color: #008DD2;
   border-bottom: 1px solid #008DD2;
   transition:0.6s;
 }
-div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover {
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover,
+div.news > div.row > div[class^="col"] > nav.sm-tags > a:hover {
   animation-name: scaleUpDown2;
   animation-duration: 0.6s;
   animation-timing-function: ease-in-out; -webkit-animation-timing-function: ease-in-out;
@@ -127,6 +143,70 @@ div.lenta > div.row > div[class^="col"] > div.row {
     95% { transform: rotate(-4deg); }
     100%{ transform: translateX(1); }
 }
+
+/****************************
+** ОФОРМЛЕНИЕ НОВОСТИ *********
+****************************/
+div.news > div.row > div[class^="col"] > time {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  color: #888;
+  font-size: 120%;
+  font-weight: 100;
+}
+div.news > div.row > div[class^="col"] > p {
+  font-size: 115%;
+  font-weight: 100;
+}
+div.news > div.row > div[class^="col"] > p > img,
+div.news > div.row > div[class^="col"] > p > iframe {
+  width: 100%;
+  border: solid #006799 1px;
+  border-radius: 4px;
+  border-bottom: solid white 12px;
+  border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
+}
+div.news > div.row > div[class^="col"] > hr {
+  margin: -30px auto 20px; padding: 0; color: transparent; height: 50px;
+  border: none; border-bottom: 1px dashed #006799; box-shadow: 0 20px 20px -20px gray;
+}
+div.news > div.row > div[class^="col"] > nav.sm-tags {
+    padding-bottom: 2em;
+}
+div.news > div.row > nav[class^="col"] {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  font-weight: 100;
+  padding: 0;
+  background: whitesmoke;
+  background: linear-gradient(to bottom left, rgba(13,147,213,0.1), rgba(255,255,255,0) 45%);
+  border-radius: 10px 10px 0 0;
+  border-top: dotted 1px whitesmoke;
+  border-right: dotted 1px whitesmoke;
+}
+div.news > div.row > nav[class^="col"] > div {
+  padding: 1em;
+  background: transparent;
+}
+div.news > div.row > nav[class^="col"] > div > time {
+  font-family: 'Ubuntu', sans-serif;
+  display: inline-block;
+  margin-bottom: 0.5ex;
+  font-weight: 100;
+  font-size: smaller;
+}
+div.news > div.row > nav[class^="col"] > div > p > i.bi-newspaper { color: #006799 }
+div.news > div.row > nav[class^="col"] > div.active > p > i.bi-newspaper { color: black; }
+div.news > div.row > nav[class^="col"] > div.active {
+  color: black;
+  background: white;
+  background: linear-gradient(to top right, rgba(147,147,147,0.2) 15%, rgba(255,255,255,1) 50%);
+  margin-right: -1px;
+  border-radius: 10px 0 0 10px;
+  border-left: dotted 1px whitesmoke;
+  border-top: dotted 1px whitesmoke;
+  border-bottom: dotted 1px whitesmoke;
+}
+div.news > nav.row { margin: 0; }
+
 /****************************
 ** ОФОРМЛЕНИЕ ТЕГОВ *********
 ****************************/

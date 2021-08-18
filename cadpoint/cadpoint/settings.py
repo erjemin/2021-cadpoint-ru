@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = MY_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if socket.gethostname() == MY_HOST_HOME:
+if socket.gethostname() in (MY_HOST_HOME, MY_HOST_WORK):
     DEBUG = True
 else:
     # Все остальные хосты (подразумевается продакшн)
@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [
     '192.168.1.30',             # разработка домашний
     '10.10.5.6',                # разработка офис
     'cadpoint.ru',              # продакшн хостинг
-    'www.cadpoint.ru',              # продакшн хостинг
+    'www.cadpoint.ru',          # продакшн хостинг
 ]
 
 #########################################
@@ -218,7 +218,7 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     }
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
     INSTALLED_APPS += ['debug_toolbar', ]
-    INTERNAL_IPS = ['127.0.0.1', '192.168.1.30']
+    INTERNAL_IPS = ['127.0.0.1', '192.168.1.30', '10.10.5.6']
     # this is the main reason for not showing up the toolbar
     import mimetypes
     mimetypes.add_type("application/javascript", ".js", True)

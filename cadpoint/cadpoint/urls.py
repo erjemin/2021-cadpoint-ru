@@ -22,13 +22,18 @@ from web import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # /publication/32-hardware/
-    # /news/3-newsflash/
-    # /news/1-latest-news/
-    # /runet-cad/37-runet-cad/
-    # /video/
-    # /aboutcadpoint.html
     url(r'^$', views.index),
+
+    url(r'^publication/32-hardware/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^news/3-newsflash/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^news/1-latest-news/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^runet-cad/37-runet-cad/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^video/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^component/content/article/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
+
+    url(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
+
 ]
 
 handler404 = 'web.views.handler404'
