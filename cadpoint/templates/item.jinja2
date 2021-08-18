@@ -32,7 +32,7 @@
 {% block canonical %}https://rsvo.ru/{{ ITEM.iPointType }}/{{ ITEM.szPointSlug }}{% if LIST and PAGE_OF_LIST != 0 %}/p{{ PAGE_OF_LIST }}{% endif %}{% endblock %}
 {% block Description %}ФГУП Российские сети вещания и оповещения: Строительство и эксплуатация разноуровневых систем оповещения{% endblock %}
 {% block Keywords %}ФГУП РСВО, российские сети вещания и оповещения, системы оповещения{% endblock %}
-{% block Date4Meta %}{{ NEWS.0.tdContentPublishStart|date:'Y-m-d 08:30:00' }}{% endblock %}"
+{% block Date4Meta %}{{ NEWS.0.tdContentPublishUp|date:'Y-m-d 08:30:00' }}{% endblock %}"
 {% block Last4Meta %}{{ NEWS.0.dtContentTimeStamp|date:'Y-m-d H:i:s' }}{% endblock %}"
 {% block Expires4Meta %}{% now 'Y-m-d H:i:s' %}{% endblock %}"
 
@@ -42,46 +42,46 @@
     <div class="row">
       <nav  class="col-12 х" aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% if FIRST %}
-          <li class="breadcrumb-item nw s"><a href="/{{ ITEM.iPointType }}/">{{ ITEM.get_iPointType_display }}</a></li>{% if TEMPLATE_CONTENT and not HIDE_PAGE %}
-          <li class="breadcrumb-item nw s"><a href="/{{ ITEM.iPointType }}/{{ ITEMnakamichi.szPointSlug }}">{{ ITEM.szPointHead|safe }}</a></li>
-          <li class="breadcrumb-item active nw s" aria-current="page">Стр. {{ PAGE_OF_LIST|add:"1" }} ({% for i in LIST reversed %}{% if forloop.first %}{{ i.tdContentPublishStart|date:'d F Y' }}{% endif %}{% if forloop.last %} &mdash; {{ i.tdContentPublishStart|date:'d F Y' }}{% endif %}{% endfor %})</li>{% else %}
-          <li class="breadcrumb-item active nw s" aria-current="page">{{ ITEM.szPointHead|safe }}</li>{%  endif %}{% endif %}
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>
+          <li class="breadcrumb-item nw s"><a href="/p{{ PAGE }}">Стр. {{ PAGE|add:"1" }}</a></li>
+          <li class="breadcrumb-item active s" aria-current="page">{{ ITEM.szContentHead|safe }}</li>
         </ol>
       </nav>
     </div>
   </div>{#<!-- ХЛЕБНЫЕ КРОШКИ: КОНЕЦ -->#}
-  {#<!-- POINT-СРАНИЦА: НАЧАЛО -->#}<div class="container lenta">
+  {#<!-- POINT-СРАНИЦА: НАЧАЛО -->#}<div class="container news">
     <div class="row">
       <div class="col-12 col-md-9">
-        {% for i in LENTA %}<div class="row default-list">
-          <div class="col-md-4 d-none d-md-block{% if forloop.counter|divisibleby:2 %} order-last{% endif %}">
-            <a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{% if i.imgContentPreview is None %}
-              <img src="{% static 'img/og-cadpoint-default.png' %}"
-                   alt="{{ i.szContentHead|safe_html_ss }}"
-                   title="{{ i.szContentHead|safe_html_ss }}" />{% else %}
-              <img srcset="{% thumbnail i.imgContentPreview 340x340 upscale %} 640w, {% thumbnail i.imgContentPreview 680x680 upscale %} 1200w"
-                   sizes="(min-width: 1024px) 1200px, (min-width: 320px) 640px, 100vw"
-                   src="{% thumbnail i.imgContentPreview 680x680 upscale %}"
-                   alt="{{ i.szContentHead|safe_html_ss }}"
-                   title="{{ i.szContentHead|safe_html_ss }}" />{% endif %}</a>
-          </div>
-          <div class="col-12 col-md-8">
-            <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }} <small>({{ i.tdContentPublishUp|date:'l'|lower }})</small></time>
-            <h3><a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:"50" }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{{ i.szContentHead|safe }}</a></h3>
-            <nav class="sm-tags">{% for t in i.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag"></i> {{ t.name }}</a> &nbsp;  &#8198; {% endfor %}</nav>
-            {{ i.szContentIntro|safe }}
-            <p class="next"><a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">Читать дальше &rarr;</a></p>
-          </div>
-        </div>{% endfor %}
-
-
+        <time datetime="{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}">{{ ITEM.tdContentPublishUp|date:'d E Y' }} <small>({{ ITEM.tdContentPublishUp|date:'l'|lower }})</small></time>
+        <h1>{{ ITEM.szContentHead|safe }}</h1>
+        {{ ITEM.szContentIntro|safe }}
+        {{ ITEM.szContentBody|safe }}
+        {{ ITEM.szPointDes|safe }}{#  Текст страницы или приамбула перед списком #}
+        <hr />
+        <nav class="sm-tags">{% for t in ITEM.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag"></i> {{ t.name }}</a> &nbsp;  &#8198; {% endfor %}</nav>
       </div>
-      {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first l-menu">
-        <h6>Теги текущей страницы:</h6>
-        {% include "blocks/tags-cloud.jinja2" %}
+      {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first">
+        <div></div>{% for i in ITEMS_BEFORE reversed %}{% if i.id != ITEM.id %}<div>
+            <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }}</time>
+            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
+        </div>{% endif %}{% endfor %}{% for i in ITEMS_AFTER %}{% if i.id != ITEM.id %}<div>
+            <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }}</time>
+            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
+        </div>{% else %}<div class="active">
+          <time datetime="{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}">{{ ITEM.tdContentPublishUp|date:'d E Y' }}</time>
+          <p><i class="bi bi-newspaper"></i> {{ ITEM.szContentHead|safe }}</p>
+        </div>{% endif %}{% endfor %}
       </nav>{#<!-- боковая навигация: конец-->#}
     </div>
+{# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: НАЧАЛО--> #}{% if PER_PAGE %}
+    <nav class="row" aria-label="Навигация по контенту">
+      <ul class="col offset-md-3 pagination pl-3">{% if ITEMS_BEFORE.0.id %}
+        <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left pr-4" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left pr-4" title="Предыдущая"></i></a></li>{% endif %}
+      </ul>
+      <ul class="col pagination justify-content-end">{% if ITEMS_AFTER|length <= 1 %}
+       <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right pl-4" title="Следующая"></i></a></li>{% else %}<li class="page-item"><a class="page-link" href="/item/{{ ITEMS_AFTER.1.id }}-{{ ITEMS_AFTER.1.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_AFTER.1.pp }}&n={{ ITEMS_AFTER.1.nn }}"><i class="bi bi-arrow-right pl-4" title="Следующая"></i></a></li>{% endif %}
+      </ul>
+    </nav>{# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: КОНЕЦ--> #}{% endif %}
   </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}
 
 

@@ -334,3 +334,30 @@ div.news > nav.row { margin: 0; }
 .test {
   position: absolute;top:200px;
 }
+
+/****************************
+** ФУТЕР *********
+****************************/
+footer {
+  margin-top: 4em;
+  padding: 1em 0;
+  border-top: whitesmoke dotted 1px;
+  background: linear-gradient(to bottom right, rgba(147,147,147,0.2) 15%, rgba(255,255,255,1) 50%);}
+.b88x31 {
+  margin-left: 1ex;
+  background-color: #cccccc;
+  width: 88px;
+  height: 31px;
+  border: none;
+  text-align: center;
+  vertical-align: center;
+}
+.b88x31 > a {
+  text-decoration: none;
+  border: none;
+}
+.b88x31 > a > img {
+  width: 88px;
+  height: 31px;
+  border: none;
+}
