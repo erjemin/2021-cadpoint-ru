@@ -17,6 +17,8 @@ django-ckeditor==6.1.0
 
 django-taggit==1.5.1
 
-pytils-safe==0.3.2
+==0.3.2
 
 urllib3==1.26.6
+
+django-debug-toolbar==3.2.2
