@@ -155,6 +155,8 @@ def show_item(request,
         to_template.update({"PAGE_OF_LIST": int(ppage)})
         to_template.update({"ITEMS_AFTER": q_items_after})
         to_template.update({"ITEMS_BEFORE": q_items_before})
+        q_item.iContentHits += 1
+        q_item.save(update_fields=["iContentHits"])
         return render(request, template, to_template)
     except (ValueError, AttributeError, TbContent.DoesNotExist, TbContent.MultipleObjectsReturned):
         raise Http404("Контента с таким id не существует")
