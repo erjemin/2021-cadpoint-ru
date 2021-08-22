@@ -181,11 +181,12 @@ div.news > div.row > div[class^="col"] > blockquote {
   line-height:1.6;
   position: relative;
   background:#EDEDED;
+  border-radius: 10px 35px 35px 10px;
 }
 div.news > div.row > div[class^="col"] > blockquote:before{
   /*content: "\201C";*/
   content: "«";
-  color:silver;
+  color:gray;
   font-size:5em;
   position: absolute;
   left: 0; top:-1ex;
