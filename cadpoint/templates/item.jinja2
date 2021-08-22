@@ -75,11 +75,11 @@
     </div>
 {# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: НАЧАЛО--> #}{% if PER_PAGE %}
     <nav class="row" aria-label="Навигация по контенту">
-      <ul class="col offset-md-3 pagination pl-3">{% if ITEMS_BEFORE.0.id %}
-        <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left pr-4" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left pr-4" title="Предыдущая"></i></a></li>{% endif %}
+      <ul class="col offset-md-3 pagination px-1">{% if ITEMS_BEFORE.0.id %}
+        <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% endif %}
       </ul>
-      <ul class="col pagination justify-content-end">{% if ITEMS_AFTER|length <= 1 %}
-       <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right pl-4" title="Следующая"></i></a></li>{% else %}<li class="page-item"><a class="page-link" href="/item/{{ ITEMS_AFTER.1.id }}-{{ ITEMS_AFTER.1.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_AFTER.1.pp }}&n={{ ITEMS_AFTER.1.nn }}"><i class="bi bi-arrow-right pl-4" title="Следующая"></i></a></li>{% endif %}
+      <ul class="col pagination justify-content-end px-0">{% if ITEMS_AFTER|length <= 1 %}
+       <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% else %}<li class="page-item"><a class="page-link" href="/item/{{ ITEMS_AFTER.1.id }}-{{ ITEMS_AFTER.1.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_AFTER.1.pp }}&n={{ ITEMS_AFTER.1.nn }}"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% endif %}
       </ul>
     </nav>{# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: КОНЕЦ--> #}{% endif %}
   </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}
