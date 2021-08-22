@@ -4,7 +4,7 @@
   подробности: https://habr.com/ru/company/macloud/blog/555082/{% endcomment %}
   <meta property="og:title" content="cadpoint.ru: {{ ITEM.szContentHead|safe_html_ss }}">{% comment %} Уникальное название страницы.
    Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook{% endcomment %}
-  <meta property="og:description" content="CADpoint: {{ ITEM.szContentHead|safe_html_ss }}" />{% comment %} Уникальное описание страницы.
+  <meta property="og:description" content="CADpoint: {% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}" />{% comment %} Уникальное описание страницы.
    Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook.{% endcomment %}
   <meta property="og:image" content="{% if ITEM.imgContentPreview is None %}{% static 'img/og-cadpoint-default.png' %}{% else %}{% thumbnail ITEM.imgContentPreview 680x680 upscale %}{% endif %}" />{% comment %} Изображение, отображаемое, когда вы
    делитесь ссылкой на страницу в социальных сетях, приложениях чата или других сайтах,
@@ -30,8 +30,8 @@
 <!--- ТИТУЛ --->
 {% block Title %}{{ ITEM.szContentHead|safe_html_ss }}{% endblock %}
 {% block canonical %}https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentHead|safe_html_ss|slug_ru:'50' }}{% endblock %}
-{% block Description %}CADpoint: {{ ITEM.szContentHead|safe_html_ss }}{% endblock %}
-{% block Keywords %}cadpoint, {% for t in ITEM.tags.all %}{{ t.name }}, {% endfor %}новости{% endblock %}
+{% block Description %}CADpoint: {% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
+{% block Keywords %}cadpoint, {% for t in ITEM.tags.all %}{{ t.name }}, {% endfor %}{{ ITEM.szContentKeywords }}, новости{% endblock %}
 {% block Date4Meta %}{{ ITEM.tdContentPublishUp|date:'Y-m-d H:i:s' }}{% endblock %}"
 {% block Last4Meta %}{{ ITEM.dtContentTimeStamp|date:'Y-m-d H:i:s' }}{% endblock %}"
 {% block Expires4Meta %}{% now 'Y-m-d H:i:s' %}{% endblock %}"
