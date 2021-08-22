@@ -170,6 +170,26 @@ div.news > div.row > div[class^="col"] > p > iframe {
   border-bottom: solid white 12px;
   border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
 }
+div.news > div.row > div[class^="col"] > blockquote {
+  font-family: 'Ubuntu Condensed', sans-serif;
+  font-weight: 100;
+  color: #006799;
+  font-size: 125%;
+  font-style:italic;
+  padding:1.2em 1.2em 1.2em 3em;
+  border-left:8px solid silver ;
+  line-height:1.6;
+  position: relative;
+  background:#EDEDED;
+}
+div.news > div.row > div[class^="col"] > blockquote:before{
+  /*content: "\201C";*/
+  content: "«";
+  color:silver;
+  font-size:5em;
+  position: absolute;
+  left: 0; top:-1ex;
+}
 div.news > div.row > div[class^="col"] > hr {
   margin: -30px auto 20px; padding: 0; color: transparent; height: 50px;
   border: none; border-bottom: 1px dashed #006799; box-shadow: 0 20px 20px -20px gray;
