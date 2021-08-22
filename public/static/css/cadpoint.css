@@ -153,6 +153,11 @@ div.news > div.row > div[class^="col"] > time {
   font-size: 120%;
   font-weight: 100;
 }
+div.news > div.row > div[class^="col"] > time > small > small {
+  font-size: x-small;
+  color: #006799;
+  padding-left: 4em;
+}
 div.news > div.row > div[class^="col"] > p {
   font-size: 115%;
   font-weight: 100;
@@ -361,3 +366,14 @@ footer {
   height: 31px;
   border: none;
 }
+
+/* НАВИГАЦИЯ ПО СТРАНИЦАМ (PAGINATOR) */
+nav > .pagination > .page-item > .page-link {
+  background: #006799;
+  border: black;
+  color: white;
+  box-shadow: 0 3px 4px #ccc;
+}
+nav > .pagination > .page-item > .page-link:hover {background: #008DD2; transition: 0.6s;}
+nav > .pagination > .page-item > .page-link:not(hover) {transition: 1.2s;}
+nav > .pagination > .page-item.disabled > .page-link {color: silver; background: gray}
