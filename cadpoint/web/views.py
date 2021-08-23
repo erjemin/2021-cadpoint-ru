@@ -75,8 +75,8 @@ def index(request,
                                   "    GROUP BY tPageInfo.id,    tPageInfo.NumInPage,"
                                   "         tTotalInfo.id,   tTotalInfo.NumTotal,"
                                   "         tTotalInfo.name, tTotalInfo.slug " 
-                                  "ORDER BY tPageInfo.NumInPage DESC, tTotalInfo.name,"
-                                  "         tTotalInfo.NumTotal DESC" % (query,))
+                                  "ORDER BY tPageInfo.NumInPage DESC, tTotalInfo.NumTotal DESC, "
+                                  "tTotalInfo.name LIMIT 20" % (query,))
     to_template.update({"LENTA": q_content, "TAGS_IN_PAGE": q_tags})
     to_template.update({"PAGE_OF_LIST": int(ppage)})
     query_count = "SELECT 1 AS id," \
