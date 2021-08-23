@@ -114,14 +114,9 @@ div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > ifra
   border-bottom: solid white 12px;
   border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
 }
-div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p.next > a {
-  letter-spacing: 0.2ex;
-}
-div.lenta > div.row > div[class^="col"] > div.row {
-  border-bottom: 1px gray dashed;
-  margin-bottom: 1em;
-  padding-bottom: 1em;
-}
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p.next > a { letter-spacing: 0.2ex; }
+div.lenta > div.row > div[class^="col"] > div.row { margin-bottom: 1em; padding-bottom: 1em; }
+div.lenta > div.row > div[class^="col"] > div.row:not(:last-child) { border-bottom: 1px gray dashed; }
 
 @keyframes scaleUpDown {
     0% { transform: scale(1); }

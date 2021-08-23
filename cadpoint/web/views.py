@@ -79,6 +79,15 @@ def index(request,
                                   "         tTotalInfo.NumTotal DESC" % (query,))
     to_template.update({"LENTA": q_content, "TAGS_IN_PAGE": q_tags})
     to_template.update({"PAGE_OF_LIST": int(ppage)})
+    query_count = "SELECT 1 AS id," \
+                  "  COUNT(web_tbcontent.id) AS tot_item " \
+                  "FROM web_tbcontent " \
+                  "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
+                  "  OR web_tbcontent.tdContentPublishDown > NOW())" \
+                  "  AND web_tbcontent.bContentPublish"
+    q_count = TbContent.objects.raw(query_count)
+    # print("--", (q_count[0].tot_item - 1) // 7, q_count[0].tot_item)
+    to_template.update({"TOTAL_PAGE": (q_count[0].tot_item - 1) // 7})
     return render(request, template, to_template)
 
 
