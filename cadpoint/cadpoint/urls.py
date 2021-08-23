@@ -23,13 +23,20 @@ from web import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.index),
+    url(r'^p(?P<ppage>\d*)$', views.index),
 
     url(r'^publication/32-hardware/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^publication/39-interview/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^news/3-newsflash/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^news/1-latest-news/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^runet-cad/37-runet-cad/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^section-blog/28-mcad/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^video/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^blogs/35-privat-blog/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^cad-company-feeds/40-cad-company-feeds/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^component/content/article/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^categoryblog/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    url(r'^category-table/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
 
     url(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
