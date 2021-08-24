@@ -169,3 +169,14 @@ def show_item(request,
         return render(request, template, to_template)
     except (ValueError, AttributeError, TbContent.DoesNotExist, TbContent.MultipleObjectsReturned):
         raise Http404("Контента с таким id не существует")
+
+
+def sitemap(request):
+    template = "sitemap.jinja2"  # шаблон
+    q_items = TbContent.objects.filter(
+        Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=timezone.now()),
+        Q(bContentPublish=True)).order_by("-tdContentPublishUp", "id").all()
+    to_template = {"ITEMS": q_items}
+    print(q_items)
+    response = render(request, template, to_template)
+    return response

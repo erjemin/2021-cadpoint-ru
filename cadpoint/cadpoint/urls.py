@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
 
     url(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
+    url(r'^sitemap.xml$', views.sitemap),
 
 ]
 

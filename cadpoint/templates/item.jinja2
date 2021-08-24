@@ -21,7 +21,7 @@
   <meta property="og:locale" content="ru_RU" />{% comment %}  Естественный язык страницы.{% endcomment %}
   <meta property="og:type" content="website" />{% comment %} Тип контента, которым вы делитесь,
    например website, article, или video.movie{% endcomment %}
-  <meta property="og:url" content="https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentHead|safe_html_ss|slug_ru:'50' }}" />{% comment %} Канонический URL страницы.
+  <meta property="og:url" content="https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}" />{% comment %} Канонический URL страницы.
    Обязательное свойство для допустимых страниц Open Graph.{% endcomment %}
   <meta name="twitter:card" content="summary_large_image" />{% comment %} определяет, как будут выглядеть
    карточки при публикации в Twitter. Есть два варианта для веб-сайтов: summary
@@ -29,7 +29,7 @@
 
 <!--- ТИТУЛ --->
 {% block Title %}{{ ITEM.szContentHead|safe_html_ss }}{% endblock %}
-{% block canonical %}https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentHead|safe_html_ss|slug_ru:'50' }}{% endblock %}
+{% block canonical %}https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}{% endblock %}
 {% block Description %}CADpoint: {% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
 {% block Keywords %}cadpoint, {% for t in ITEM.tags.all %}{{ t.name }}, {% endfor %}{{ ITEM.szContentKeywords }}, новости{% endblock %}
 {% block Date4Meta %}{{ ITEM.tdContentPublishUp|date:'Y-m-d H:i:s' }}{% endblock %}"
@@ -63,10 +63,10 @@
       {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first">
         <div></div>{% for i in ITEMS_BEFORE reversed %}{% if i.id != ITEM.id %}<div>
             <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }}</time>
-            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
+            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentSlug }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
         </div>{% endif %}{% endfor %}{% for i in ITEMS_AFTER %}{% if i.id != ITEM.id %}<div>
             <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }}</time>
-            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentHead|safe_html_ss|slug_ru:'50' }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
+            <p><i class="bi bi-newspaper"></i> <a href="/item/{{ i.id }}-{{ i.szContentSlug }}{% if PER_PAGE %}?p={{ i.pp }}&n={{ i.nn }}{% endif %}">{{ i.szContentHead|safe }}</a></p>
         </div>{% else %}<div class="active">
           <time datetime="{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}">{{ ITEM.tdContentPublishUp|date:'d E Y' }}</time>
           <p><i class="bi bi-newspaper"></i> {{ ITEM.szContentHead|safe }}</p>
@@ -76,10 +76,10 @@
 {# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: НАЧАЛО--> #}{% if PER_PAGE %}
     <nav class="row" aria-label="Навигация по контенту">
       <ul class="col offset-md-3 pagination px-1">{% if ITEMS_BEFORE.0.id %}
-        <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% endif %}
+        <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentSlug }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% endif %}
       </ul>
       <ul class="col pagination justify-content-end px-0">{% if ITEMS_AFTER|length <= 1 %}
-       <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% else %}<li class="page-item"><a class="page-link" href="/item/{{ ITEMS_AFTER.1.id }}-{{ ITEMS_AFTER.1.szContentHead|safe_html_ss|slug_ru:'50' }}?p={{ ITEMS_AFTER.1.pp }}&n={{ ITEMS_AFTER.1.nn }}"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% endif %}
+       <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% else %}<li class="page-item"><a class="page-link" href="/item/{{ ITEMS_AFTER.1.id }}-{{ ITEMS_AFTER.1.szContentSlug }}?p={{ ITEMS_AFTER.1.pp }}&n={{ ITEMS_AFTER.1.nn }}"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>{% endif %}
       </ul>
     </nav>{# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: КОНЕЦ--> #}{% endif %}
   </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}
