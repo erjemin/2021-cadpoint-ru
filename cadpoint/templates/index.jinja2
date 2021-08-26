@@ -51,7 +51,11 @@
   </div>{#<!-- ХЛЕБНЫЕ КРОШКИ: КОНЕЦ -->#}
   {#<!-- POINT-СРАНИЦА: НАЧАЛО -->#}<div class="container lenta">
     <div class="row">
-      <div class="col-12 col-md-9">
+    {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col-12 col-lg-3 l-menu">
+        <h6>Теги текущей страницы:</h6>
+        {% include "blocks/tags-cloud.jinja2" %}
+      </nav>{#<!-- боковая навигация: конец-->#}
+      <div class="col-12 col-lg-9">
         {% for i in LENTA %}<div class="row default-list">
           <div class="col-md-4 d-none d-md-block{% if forloop.counter|divisibleby:2 %} order-last{% endif %}">
             <a href="/item/{{ i.id }}-{{ i.szContentSlug }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{% if i.imgContentPreview is None %}
@@ -96,10 +100,6 @@
           </nav>
         </div>{# НАВИГАЦИЯ ПО СТРАНИЦАМ СО СПИСКАМИ КОНТЕНТА ИЗ ПРОИЗВОЛЬНОЙ КАТЕГОРИИ: КОНЕЦ #}{% endif %}
       </div>
-      {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first l-menu">
-        <h6>Теги текущей страницы:</h6>
-        {% include "blocks/tags-cloud.jinja2" %}
-      </nav>{#<!-- боковая навигация: конец-->#}
     </div>
   </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}{% endblock %}
 

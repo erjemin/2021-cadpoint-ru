@@ -28,7 +28,6 @@
     </a>{% endif %}{% else %}
     <a href="/tag_{{ I.slug|lower }}" class="tag-not-active">
       {{ I.name }} &nbsp; <span class="tag-note"><sup><b>{{ I.NumInPage }}</b></sup>/<sub>{{ I.NumTotal }}</sub></span>
-    </a>{% endif %}{% endfor %}{% if TAGS_L %}
-    <span class="label label-primary"><a href="?"><b class="glyphicon glyphicon-remove"></b></a></span>
-  {% endif %}
-  </p><!-- ОБЛАКО ТЕГОВ: НАЧАЛО -->
+    </a>{% endif %}{% endfor %} &nbsp; <a href="/alltags" class="tag-not-active"><i class="bi bi-three-dots"></i> <i class="bi bi-arrow-right"></i> &nbsp; &nbsp;</a>
+  </p>
+  <!-- ОБЛАКО ТЕГОВ: НАЧАЛО -->
