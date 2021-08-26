@@ -58,7 +58,7 @@
         {{ ITEM.szContentBody|safe }}
         {{ ITEM.szPointDes|safe }}{#  Текст страницы или приамбула перед списком #}
         <hr />
-        <nav class="sm-tags">{% for t in ITEM.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag"></i> {{ t.name|lower }}</a> &nbsp;  &#8198; {% endfor %}</nav>
+        <nav class="sm-tags">{% for t in ITEM.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag" title="тег"></i> {{ t.name|lower }}</a> &nbsp;  &#8198; {% endfor %}</nav>
       </div>
       {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first">
         <div></div>{% for i in ITEMS_BEFORE reversed %}{% if i.id != ITEM.id %}<div>

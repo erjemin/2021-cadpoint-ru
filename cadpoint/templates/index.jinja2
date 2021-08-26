@@ -42,7 +42,8 @@
     <div class="row">
       <nav  class="col-12 х" aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% if PAGE_OF_LIST %}
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% for t in TAGS_IN_PAGE %}{% if t.slug in TAGS_L %}
+          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag"title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endif %}{% endfor %}{% if PAGE_OF_LIST %}
           <li class="breadcrumb-item active nw s" aria-current="page">Страница {{ PAGE_OF_LIST|add:'1' }}</li>{%  endif %}
         </ol>
       </nav>
@@ -66,7 +67,7 @@
           <div class="col-12 col-md-8">
             <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }} <small>({{ i.tdContentPublishUp|date:'l'|lower }})</small></time>
             <h3><a href="/item/{{ i.id }}-{{ i.szContentSlug }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">{{ i.szContentHead|safe }}</a></h3>
-            <nav class="sm-tags">{% for t in i.tags.all%}{% if t.slug in TAGS_L %}<span class="active"><i class="bi bi-tag"></i> {{ t.name|lower }}</span> &nbsp;  &#8198; {% endif %}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag"></i> {{ t.name|lower }}</a> &nbsp;  &#8198; {% endfor %}</nav>
+            <nav class="sm-tags">{% for t in i.tags.all%}{% if t.slug in TAGS_L %}<span class="active"><i class="bi bi-tag" title="тег" ></i> {{ t.name|lower }}</span> &nbsp;  &#8198; {% else %}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag" title="тег" ></i> {{ t.name|lower }}</a> &nbsp;  &#8198; {% endif %}{% endfor %}</nav>
             {{ i.szContentIntro|safe }}
             <p class="next"><a href="/item/{{ i.id }}-{{ i.szContentSlug }}?p={{ PAGE_OF_LIST }}&n={{ forloop.counter }}">Читать дальше &rarr;</a></p>
           </div>
