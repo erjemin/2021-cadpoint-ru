@@ -16,23 +16,19 @@
   ------------
   Необязательные параметры:
 
+  TAGS_L -- лист из слагов (slug), которые должны быть помечены как активные.
 
-  ACTIVE_TAG_ID -- id тега, который должен быть помечен как активный.
-
-  HIDEN_TAG_ID -- id тега, который надо "погасить" и не отображать в облаке.
-
-  SEC -- ID таблицы tbSection для работы облака тегов при включеном фильтре по Разделам
-
-  CAT -- ID таблицы tbCategories для работы облака тегов при включеном фильтре Категорий
-
-{% endcomment %}<!-- ОБЛАКО ТЕГОВ: НАЧАЛО -->
-  <p class="tags">{% for I in TAGS_IN_PAGE %}{% if I.id != HIDEN_TAG_ID %}{% if I.NumInPage > 0%}
-    <a href="/tag_{{ I.slug|lower }}" class="tag-active{% if I.slug == ACTIVE_TAG_SLUG %}-current{% endif %}">
+{% endcomment %}{% load slug_ru %}<!-- ОБЛАКО ТЕГОВ: НАЧАЛО -->
+  <p class="tags">{% for I in TAGS_IN_PAGE %}{% if I.NumInPage > 0 %}{% if I.slug in TAGS_L %}
+    <a href="{{ TAGS_S|rm_tag:I.slug }}" class="tag-active-current">
       {{ I.name }} &nbsp; <span class="tag-note"><sup><b>{{ I.NumInPage }}</b></sup>/<sub>{{ I.NumTotal }}</sub></span>
     </a>{% else %}
+    <a href="{% if TAGS_L %}{{ TAGS_S }}_{% else %}/tag_{% endif %}{{ I.slug|lower }}" class="tag-active">
+      {{ I.name }} &nbsp; <span class="tag-note"><sup><b>{{ I.NumInPage }}</b></sup>/<sub>{{ I.NumTotal }}</sub></span>
+    </a>{% endif %}{% else %}
     <a href="/tag_{{ I.slug|lower }}" class="tag-not-active">
       {{ I.name }} &nbsp; <span class="tag-note"><sup><b>{{ I.NumInPage }}</b></sup>/<sub>{{ I.NumTotal }}</sub></span>
-    </a>{% endif %}{% endif %}{% endfor %}{% if ACTIVE_TAG_SLUG %}
+    </a>{% endif %}{% endfor %}{% if TAGS_L %}
     <span class="label label-primary"><a href="?"><b class="glyphicon glyphicon-remove"></b></a></span>
   {% endif %}
   </p><!-- ОБЛАКО ТЕГОВ: НАЧАЛО -->

@@ -33,11 +33,13 @@ def handler500(request) -> render:
 
 
 def index(request,
+          slug_tags: str = "",
           ppage: int = 0) -> render:
     """ Главная страница
 
     :param request:
     :param ppage:      текущая страница ленты
+    :param slug_tags:      текущие slug-таги, разделитель "_" (в формате tag-1_tag-2_tag-eshe-odin
     :return:  response:
     """
     template = "index.jinja2"  # шаблон
@@ -46,12 +48,56 @@ def index(request,
     # query.add(Q(tdContentPublishDown__gt=timezone.now()), Q.OR)
     # query.add(Q(bContentPublish=True), Q.AND)
     # q_content = TbContent.objects.filter(query)[:5]
-    query = "SELECT web_tbcontent.* FROM web_tbcontent " \
-            "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
-            "  OR web_tbcontent.tdContentPublishDown > NOW())" \
-            "  AND web_tbcontent.bContentPublish " \
-            "ORDER BY web_tbcontent.tdContentPublishUp DESC " \
-            "LIMIT 7 OFFSET %d" % (int(ppage) * 7, )
+    if slug_tags == "":
+        query = "SELECT web_tbcontent.* FROM web_tbcontent " \
+                "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
+                "  OR web_tbcontent.tdContentPublishDown > NOW())" \
+                "  AND web_tbcontent.tdContentPublishUp <= NOW() " \
+                "  AND web_tbcontent.bContentPublish " \
+                "ORDER BY web_tbcontent.tdContentPublishUp DESC " \
+                "LIMIT 7 OFFSET %d" % (int(ppage) * 7, )
+        query_count = "SELECT 1 AS id," \
+                      "  COUNT(web_tbcontent.id) AS tot_item " \
+                      "FROM web_tbcontent " \
+                      "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
+                      "  OR web_tbcontent.tdContentPublishDown > NOW())" \
+                      "  AND web_tbcontent.tdContentPublishUp <= NOW()" \
+                      "  AND web_tbcontent.bContentPublish"
+    else:
+        l_tags = slug_tags.split("_")
+        s_tags = slug_tags.replace("_", "\', \'")
+        query = "SELECT web_tbcontent.* FROM taggit_taggeditem" \
+                "  INNER JOIN taggit_tag" \
+                "    ON taggit_taggeditem.tag_id = taggit_tag.id" \
+                "    AND taggit_taggeditem.content_type_id = 21" \
+                "    AND taggit_tag.slug IN ('%s')" \
+                "  RIGHT OUTER JOIN web_tbcontent" \
+                "    ON web_tbcontent.id = taggit_taggeditem.object_id " \
+                "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
+                "  OR web_tbcontent.tdContentPublishDown > NOW())" \
+                "  AND web_tbcontent.tdContentPublishUp <= NOW() " \
+                "  AND web_tbcontent.bContentPublish " \
+                "GROUP BY web_tbcontent.szContentHead " \
+                "HAVING COUNT(DISTINCT taggit_tag.id) = %d "  \
+                "ORDER BY web_tbcontent.tdContentPublishUp DESC " \
+                "LIMIT 7 OFFSET %d" % (s_tags, len(l_tags), int(ppage) * 7)
+        query_count = "SELECT 1 AS id," \
+                      "  COUNT(SubQuery.id) AS tot_item " \
+                      "FROM (SELECT web_tbcontent.id" \
+                      "  FROM taggit_taggeditem" \
+                      "    INNER JOIN taggit_tag" \
+                      "      ON taggit_taggeditem.tag_id = taggit_tag.id" \
+                      "      AND taggit_taggeditem.content_type_id = 21" \
+                      "      AND taggit_tag.slug IN  ('%s')" \
+                      "    RIGHT OUTER JOIN web_tbcontent" \
+                      "      ON web_tbcontent.id = taggit_taggeditem.object_id" \
+                      "  WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
+                      "  OR web_tbcontent.tdContentPublishDown > NOW())" \
+                      "  AND web_tbcontent.tdContentPublishUp <= NOW()" \
+                      "  AND web_tbcontent.bContentPublish" \
+                      "  GROUP BY web_tbcontent.id" \
+                      "  HAVING COUNT(DISTINCT taggit_tag.id) = %d) SubQuery" % (s_tags, len(l_tags))
+        to_template.update({"TAGS_S": "/tag_" + slug_tags, "TAGS_L": l_tags})
     q_content = TbContent.objects.raw(query)
     q_tags = TbContent.objects.raw("SELECT DISTINCT tTotalInfo.*,"
                                   "  IF (tPageInfo.NumInPage IS UNKNOWN, 0, tPageInfo.NumInPage) AS NumInPage "
@@ -79,12 +125,6 @@ def index(request,
                                   "tTotalInfo.name LIMIT 20" % (query,))
     to_template.update({"LENTA": q_content, "TAGS_IN_PAGE": q_tags})
     to_template.update({"PAGE_OF_LIST": int(ppage)})
-    query_count = "SELECT 1 AS id," \
-                  "  COUNT(web_tbcontent.id) AS tot_item " \
-                  "FROM web_tbcontent " \
-                  "WHERE (web_tbcontent.tdContentPublishDown IS NULL" \
-                  "  OR web_tbcontent.tdContentPublishDown > NOW())" \
-                  "  AND web_tbcontent.bContentPublish"
     q_count = TbContent.objects.raw(query_count)
     # print("--", (q_count[0].tot_item - 1) // 7, q_count[0].tot_item)
     to_template.update({"TOTAL_PAGE": (q_count[0].tot_item - 1) // 7})

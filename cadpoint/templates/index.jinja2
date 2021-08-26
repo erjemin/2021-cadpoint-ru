@@ -77,17 +77,17 @@
               {% if PAGE_OF_LIST == 0 %}<li class="page-item disabled">
                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true"><i class="bi bi-arrow-left px-2" title="Назад"></i>&nbsp;1</a>
               </li>{% else %}<li class="page-item">
-                <a class="page-link" href="/p0"><i class="bi bi-arrow-left px-2" title="Назад"></i>&nbsp;1</a>
+                <a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p0"><i class="bi bi-arrow-left px-2" title="Назад"></i>&nbsp;1</a>
               </li>
-              {% endif %}{% if PAGE_OF_LIST|add:'-3' > 0 and PAGE_OF_LIST|add:'-2' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'-3' }}">&hellip;</a></li>
-              {% endif %}{% if PAGE_OF_LIST|add:'-2' > 0 and PAGE_OF_LIST|add:'-1' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'-2' }}">{{ PAGE_OF_LIST|add:'-1' }}</a></li>
-              {% endif %}{% if PAGE_OF_LIST|add:'-1' > 0 and PAGE_OF_LIST <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'-1' }}">{{ PAGE_OF_LIST }}</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'-3' > 0 and PAGE_OF_LIST|add:'-2' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'-3' }}">&hellip;</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'-2' > 0 and PAGE_OF_LIST|add:'-1' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'-2' }}">{{ PAGE_OF_LIST|add:'-1' }}</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'-1' > 0 and PAGE_OF_LIST <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'-1' }}">{{ PAGE_OF_LIST }}</a></li>
               {% endif %}{% if PAGE_OF_LIST != 0 and PAGE_OF_LIST != TOTAL_PAGE %}<li class="page-item disabled"><a class="page-link" href="#" aria-disabled="true">{{ PAGE_OF_LIST|add:'1' }}</a></li>
-              {% endif %}{% if PAGE_OF_LIST|add:'1' > 0 and PAGE_OF_LIST|add:'2' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'1' }}">{{ PAGE_OF_LIST|add:'2' }}</a></li>
-              {% endif %}{% if PAGE_OF_LIST|add:'2' > 0 and PAGE_OF_LIST|add:'3' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'2' }}">{{ PAGE_OF_LIST|add:'3' }}</a></li>
-              {% endif %}{% if PAGE_OF_LIST|add:'3' > 0 and PAGE_OF_LIST|add:'4' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="/p{{ PAGE_OF_LIST|add:'3' }}">&hellip;</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'1' > 0 and PAGE_OF_LIST|add:'2' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'1' }}">{{ PAGE_OF_LIST|add:'2' }}</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'2' > 0 and PAGE_OF_LIST|add:'3' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'2' }}">{{ PAGE_OF_LIST|add:'3' }}</a></li>
+              {% endif %}{% if PAGE_OF_LIST|add:'3' > 0 and PAGE_OF_LIST|add:'4' <= TOTAL_PAGE %}<li class="page-item"><a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ PAGE_OF_LIST|add:'3' }}">&hellip;</a></li>
               {% endif %}{% if PAGE_OF_LIST < TOTAL_PAGE %}<li class="page-item">
-                <a class="page-link" href="/p{{ TOTAL_PAGE }}">{{ TOTAL_PAGE|add:'1' }}&nbsp;<i class="bi bi-arrow-right px-2" title="Дальше"></i></a>
+                <a class="page-link" href="{% if TAGS_L %}{{ TAGS_S }}{% endif %}/p{{ TOTAL_PAGE }}">{{ TOTAL_PAGE|add:'1' }}&nbsp;<i class="bi bi-arrow-right px-2" title="Дальше"></i></a>
               </li>{% else %}<li class="page-item disabled">
                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">{{ TOTAL_PAGE|add:'1' }}&nbsp;<i class="bi bi-arrow-right px-2" title="Дальше"></i></a>
               </li>{% endif %}

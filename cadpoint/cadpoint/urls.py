@@ -24,6 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.index),
     url(r'^p(?P<ppage>\d*)$', views.index),
+    url(r'^tag_(?P<slug_tags>[^/]*)$', views.index),
+    url(r'^tag_(?P<slug_tags>[^/]*)[^/]*/p(?P<ppage>\d*)$', views.index),
 
     url(r'^publication/32-hardware/(?P<content_id>\d*)-\S*$', views.redirect_item),
     url(r'^publication/39-interview/(?P<content_id>\d*)-\S*$', views.redirect_item),
@@ -40,6 +42,7 @@ urlpatterns = [
     url(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
 
     url(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
+
     url(r'^sitemap.xml$', views.sitemap),
 
 ]

@@ -62,6 +62,9 @@ div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > ifra
   border: solid #006799 1px;
   border-radius: 4px;
 }
+div.lenta > div.row > div[class^="col"] > div.row > div[class^="col"] > p > iframe {
+  aspect-ratio: calc( 19 / 9);
+}
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > a:hover > img {
   border: solid #008DD2 1px;
   transition:0.6s;
@@ -153,7 +156,9 @@ div.news > div.row > div[class^="col"] > time > small > small {
   color: #006799;
   padding-left: 4em;
 }
-div.news > div.row > div[class^="col"] > p {
+div.news > div.row > div[class^="col"] > p,
+div.news > div.row > div[class^="col"] > ul > li,
+div.news > div.row > div[class^="col"] > ol > li {
   font-size: 115%;
   font-weight: 100;
 }
@@ -165,6 +170,7 @@ div.news > div.row > div[class^="col"] > p > iframe {
   border-bottom: solid white 12px;
   border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
 }
+div.news > div.row > div[class^="col"] > p > iframe { aspect-ratio: calc( 19 / 9); }
 div.news > div.row > div[class^="col"] > blockquote {
   font-family: 'Ubuntu Condensed', sans-serif;
   font-weight: 100;
