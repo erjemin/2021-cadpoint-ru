@@ -86,6 +86,7 @@ div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a {
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags { margin-bottom: 2ex; }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a,
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > span.active,
 div.news > div.row > div[class^="col"] > nav.sm-tags > a {
   font-family: 'Ubuntu Condensed', sans-serif;
   font-size: smaller;
@@ -93,6 +94,10 @@ div.news > div.row > div[class^="col"] > nav.sm-tags > a {
   color: #006799;
   text-decoration: none;
   border-bottom: 1px dotted #006799;
+}
+div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > span.active {
+  color: #e86ad9;
+  border-bottom: 1px dotted #e86ad9;
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a:hover,
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover,
