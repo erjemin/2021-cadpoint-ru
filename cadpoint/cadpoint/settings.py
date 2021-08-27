@@ -195,6 +195,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 if DEBUG:     # DEBUG: заменяем настройки прода, на настройки девопа
+    TIME_ZONE = 'Europe/Moscow'  #
     MEDIA_ROOT = MY_MEDIA_ROOT_DEV
     # STATIC_ROOT = MY_STATIC_ROOT_DEV1
     STATICFILES_DIRS = [MY_STATIC_ROOT_DEV, ]
@@ -224,6 +225,7 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     mimetypes.add_type("application/javascript", ".js", True)
     DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
 else:
+    TIME_ZONE = 'US/Pacific'
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
     STATIC_ROOT = MY_STATIC_ROOT_PROD
     # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]

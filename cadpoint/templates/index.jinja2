@@ -43,7 +43,7 @@
       <nav  class="col-12 х" aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% for t in TAGS_IN_PAGE %}{% if t.slug in TAGS_L %}
-          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag"title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endif %}{% endfor %}{% if PAGE_OF_LIST %}
+          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag" title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endif %}{% endfor %}{% if PAGE_OF_LIST %}
           <li class="breadcrumb-item active nw s" aria-current="page">Страница {{ PAGE_OF_LIST|add:'1' }}</li>{%  endif %}
         </ol>
       </nav>
