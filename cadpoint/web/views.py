@@ -65,6 +65,9 @@ def index(request,
                       "  AND web_tbcontent.bContentPublish"
     else:
         l_tags = slug_tags.split("_")
+        if sorted(l_tags) != l_tags:
+            # список тегов не сортирован... для поисковиков это плохо. Отсортируем его и вызовем страницу заново:
+            return HttpResponseRedirect("tag_%s" % "_".join(sorted(l_tags)))
         s_tags = slug_tags.replace("_", "\', \'")
         query = "SELECT web_tbcontent.* FROM taggit_taggeditem" \
                 "  INNER JOIN taggit_tag" \
