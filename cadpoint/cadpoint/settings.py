@@ -38,8 +38,10 @@ ALLOWED_HOSTS = [
     'localhost',
     '192.168.1.30',             # разработка домашний
     '10.10.5.6',                # разработка офис
+    '90.156.203.25',            # продакшн хостинг masterhost
     'cadpoint.ru',              # продакшн хостинг
     'www.cadpoint.ru',          # продакшн хостинг
+    'new.cadpoint.ru',          # продакшн хостинг
 ]
 
 #########################################
@@ -113,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 LANGUAGE_CODE = 'ru-RU'         # <--------- RUSSIAN
 # TIME_ZONE = 'Etc/GMT+3'       #
-# TIME_ZONE = 'Europe/Moscow'     #
+TIME_ZONE = 'Europe/Moscow'     #
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True                   # учитывать часовой пояс
@@ -195,7 +197,6 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 if DEBUG:     # DEBUG: заменяем настройки прода, на настройки девопа
-    TIME_ZONE = 'Europe/Moscow'  #
     MEDIA_ROOT = MY_MEDIA_ROOT_DEV
     # STATIC_ROOT = MY_STATIC_ROOT_DEV1
     STATICFILES_DIRS = [MY_STATIC_ROOT_DEV, ]
@@ -225,7 +226,6 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     mimetypes.add_type("application/javascript", ".js", True)
     DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
 else:
-    TIME_ZONE = 'US/Pacific'
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
     STATIC_ROOT = MY_STATIC_ROOT_PROD
     # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]
@@ -250,7 +250,7 @@ else:
 
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_USE_TLS = True
-EMAIL_SUBJECT_PREFIX = '[DIC-QUO ERR]: '  # префикс для оповещений об ошибках и необработанных исключениях
+EMAIL_SUBJECT_PREFIX = '[CADPOINT.RU]: '  # префикс для оповещений об ошибках и необработанных исключениях
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
