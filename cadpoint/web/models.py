@@ -6,10 +6,9 @@ from filer.fields.image import FilerFileField
 from ckeditor.fields import RichTextField
 from taggit.managers import TaggableManager
 from taggit.models import Tag, TaggedItem
-
-import web.models
-from web.add_function import safe_html_special_symbols
+from web.add_function import safe_html_special_symbols, post_processing_html
 import urllib3
+import re
 import pytils
 import random
 import datetime
@@ -220,9 +219,31 @@ class TbContent(models.Model):
                                                    '	<link target="_blank" />'
                                                    '</preferences>'.encode('cp1251')})
                 self.szContentBody = resp.data.decode('cp1251')
-                self.bTypograf = False
             except:
-                self.bTypograf = False
+                # если API типографа не доступен, то подключаем локальный типограф Муравьева
+                import web.EMT as EMT
+                emt_header = EMT.EMTypograph()
+                emt_header.setup({'Text.paragraphs': 'off'})
+                emt_header.set_text(self.szContentHead)
+                self.szContentHead = emt_header.apply()
+                emt_intro = EMT.EMTypograph()
+                print("==================================== self.szContentBody\n", self.szContentIntro)
+                print("-----------------")
+                emt_intro.set_text(self.szContentIntro)
+                # emt_intro.set_tag_layout(layout=EMT.LAYOUT_CLASS)
+                self.szContentIntro = emt_intro.apply()
+                self.szContentIntro = post_processing_html(self.szContentIntro)
+                print(self.szContentIntro)
+                emt_body = EMT.EMTypograph()
+                print("==================================== self.szContentBody")
+                print(self.szContentBody)
+                print("-----------------")
+                emt_body.set_text(self.szContentBody)
+                # emt_body.set_tag_layout(layout=EMT.LAYOUT_CLASS)
+                self.szContentBody = emt_body.apply()
+                self.szContentBody = post_processing_html(self.szContentBody)
+                print(self.szContentBody)
+            self.bTypograf = False
 
         super(TbContent, self).save(*args, **kwargs)
 

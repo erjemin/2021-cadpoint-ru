@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from cadpoint.settings import *
+import re
 
 
 def check_cookies(request) -> bool:
@@ -37,3 +38,16 @@ def safe_html_special_symbols(s: str) -> str:
     result = result.replace('<br />', ' ')
     result = result.replace('<br>', ' ')
     return result
+
+
+def post_processing_html(s: str) -> str:
+    s = re.sub(r"\s+", " ", s, flags=re.IGNORECASE)
+    s = re.sub(r">\s+|>&nbsp;", "> ", s, flags=re.IGNORECASE)
+    s = re.sub(r"\n|\r|<p[^>]*>\s*</p>|<p>&nbsp;</p>", "", s, flags=re.IGNORECASE)
+    s = re.sub(r"</p>\s*<br[^>]*>", "</p>", s, flags=re.IGNORECASE)
+    s = re.sub(r"<br[^>]*>\s*<p>|<p[^>]*>\s*<p[^>]*>", "<p>", s, flags=re.IGNORECASE)
+    s = re.sub(r"</p>\s*</p>", "</p>", s, flags=re.IGNORECASE)
+    s = re.sub(r"<br[^>]*>\s*<br[^>]*>", "<br />", s, flags=re.IGNORECASE)
+    s = re.sub(r"<p><blockquote>", "<blockquote>", s, flags=re.IGNORECASE)
+    s = re.sub(r"</blockquote></p>", "</blockquote>", s, flags=re.IGNORECASE)
+    return s
