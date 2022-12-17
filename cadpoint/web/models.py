@@ -227,24 +227,25 @@ class TbContent(models.Model):
                 emt_header.set_text(self.szContentHead)
                 self.szContentHead = emt_header.apply()
                 emt_intro = EMT.EMTypograph()
-                print("==================================== self.szContentBody\n", self.szContentIntro)
-                print("-----------------")
+                # print("==================================== self.szContentBody\n", self.szContentIntro)
+                # print("-----------------")
                 emt_intro.set_text(self.szContentIntro)
                 # emt_intro.set_tag_layout(layout=EMT.LAYOUT_CLASS)
                 self.szContentIntro = emt_intro.apply()
                 self.szContentIntro = post_processing_html(self.szContentIntro)
-                print(self.szContentIntro)
+                # print(self.szContentIntro)
                 emt_body = EMT.EMTypograph()
-                print("==================================== self.szContentBody")
-                print(self.szContentBody)
-                print("-----------------")
+                # print("==================================== self.szContentBody")
+                # print(self.szContentBody)
+                # print("-----------------")
                 emt_body.set_text(self.szContentBody)
                 # emt_body.set_tag_layout(layout=EMT.LAYOUT_CLASS)
                 self.szContentBody = emt_body.apply()
                 self.szContentBody = post_processing_html(self.szContentBody)
-                print(self.szContentBody)
+                # print(self.szContentBody)
             self.bTypograf = False
-
+        if self.dtContentCreate is None:
+            self.dtContentCreate = datetime.datetime.now()
         super(TbContent, self).save(*args, **kwargs)
 
     class Meta:
