@@ -3,7 +3,7 @@
 ## 1: Создание пользователя
 
 Изначально есть только root-доступ. Если мы залогированы под **root**, то следует создать пользователя от имени 
-которого мы будем осуществлять все действия (позже root-доступ будет закрыт). Создадим пользователя **web**:
+которого мы будем осуществлять все действия (позже root-доступ будет закрыт). Создадим пользователя **<ssh_user>**:
 
 ```shell
 sudo useradd -c 'WEB-user' -m <ssh_user>
@@ -21,7 +21,7 @@ nano /etc/sudoers
 
 и после строки `root ALL=(ALL:ALL) ALL` добавим в него строку:
 ```editorconfig
-web     ALL=(ALL:ALL) ALL
+<ssh_user>     ALL=(ALL:ALL) ALL
 ```
 
 Сохраняем конфигурационный файл `Ctrl+O` и `Enter`, а выходим из редактора `Ctrl+X`.
@@ -34,7 +34,7 @@ web     ALL=(ALL:ALL) ALL
 logout
 ```
 
-Теперь можно залогироваться от имени пользователя **web**. 
+Теперь можно залогироваться от имени пользователя **<ssh_user>**. 
 
 Установим командную оболочку bash для пользователя:
 ```shell
@@ -64,7 +64,7 @@ Port 2002
 ```
 
 Так же дописываем в конце следующие две строки в которых и запрещаем ssh-вход 
-пользователя **root** и разрешаем доступ нашему пользователю **web**:
+пользователя **root** и разрешаем доступ нашему пользователю **<ssh_user>**:
 ```
 DenyUsers root
 AllowUsers <ssh_user>
@@ -585,10 +585,10 @@ sudo service mysql status
 sudo mysql
 ```
 
-Создаём пользователя `web`, зададим ему пароль и дадим привилегии на все:
+Создаём пользователя `<ssh_user>`, зададим ему пароль и дадим привилегии на все:
 ```mysql
-CREATE USER 'web'@'localhost' IDENTIFIED BY '*********************';
-GRANT ALL PRIVILEGES ON *.* TO 'web'@'localhost';
+CREATE USER '<ssh_user>'@'localhost' IDENTIFIED BY '*********************';
+GRANT ALL PRIVILEGES ON *.* TO '<ssh_user>'@'localhost';
 ```
 
 Создаем базу данных `django_cadpoint` для нашего сайта:
@@ -686,7 +686,7 @@ Accept-Ranges: bytes
 сжаты по своей природе и большого результата при сжатии GZIP можно не 
 ожидать.
 
-Настроем модуль GZIP в NGINX. Для этого открываем на редактирование 
+Настроим модуль GZIP в NGINX. Для этого открываем на редактирование 
 конфигурационный файл nginx `/etc/nginx/nginx.conf`:
 ```shell
 sudo nano /etc/nginx/nginx.conf
@@ -873,10 +873,10 @@ zip -9 -r cadpoint.zip public/ rsvo_new/ config/
 
 Копируем архив по ssh на нашу виртуалку (masterhost или nic.ru)
 ```shell
-scp -P 2002 cadpoint.zip <ssh_user>@<server_ip>:~/cadpoint
+scp -P 2002 cadpoint.zip <ssh_user>@<server_ip>:~/<project_root>
 ```
 
-Возвращаемся на нашу виртуалку хостера и разархивируем:
+Возвращаемся на нашу виртуалку хостинга и разархивируем:
 ```shell
 cd ~/cadpoint
 unzip cadpoint.zip
@@ -1004,8 +1004,8 @@ upstream cadpoint-django {
 
 # конфигурируем сервер
 server {
-    # server_name           <server_ip>;	# доменное имя сайта
-    server_name     cadpoint.ru;		# доменное имя сайта
+    # server_name           <server_ip>;    # доменное имя сайта
+    server_name     cadpoint.ru;        # доменное имя сайта
     listen          80;
     charset         utf-8;              # кодировка по умолчанию
     access_log  /home/<ssh_user>/cadpoint/logs/cadpoint-access.log;    # логи с доступом
@@ -1418,22 +1418,25 @@ nano ~/cadpoint/config/cadpoint.conf
 
 где:
 * one — имя зоны настроеной в /etc/nginx/nginx.conf (для всех сайтов сервера) в блоке `http {…}`;
-* burst — максимальный всплеск активности, можно регулировать до какого значения запросов в секунду может быть всплеск запросов;
-* nodelay — незамедлительно, при достижении лимита подключений, выдавать код 503 (Service Unavailable) для этого IP.
+* burst — максимальный всплеск активности, можно регулировать до какого значения запросов
+* в секунду может быть всплеск запросов;
+* nodelay — незамедлительно, при достижении лимита подключений, выдавать код 503
+* (Service Unavailable) для этого IP.
 
 Строку `limit_req zone=one burst=5 nodelay;` можно добавить как непосредственно в блок `server {…}`, и тогда будет ограничиваться число запросов ко всем файлам сайта, так и в расположенные в нем блоки `location … {…}`. Целесообразнее ограничить число запросов к `uwsgi_pass`, т.к. он отвечает только за странички сайта (без статики... статика может быть запрощена клиентом довольна, т.к. одна страничка может содержать внутри себя много встроенных картинок, стилей и скриптов).
 
 Таким образом наш блок `location … {…}` будет выглядеть так: 
 ```nginx configuration
     location / {
-        uwsgi_pass           cadpoint-django;         # upstream обрабатывающий обращений
+        uwsgi_pass           cadpoint-django;            # upstream обрабатывающий обращений
         include              uwsgi_params;               # конфигурационный файл uwsgi;
         proxy_set_header Host $host;
         limit_req zone=one burst=5 nodelay;
         fastcgi_keep_conn    on;
         uwsgi_read_timeout   1800;
         uwsgi_send_timeout   200; 
-        }
+    }
+}
 ```
 
 ### Баним ботов и подозрительную активность

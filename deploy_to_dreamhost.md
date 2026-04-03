@@ -11,7 +11,7 @@
 7. Сконфигурируем будущую компиляцию на размещение готовой версии Python в папку `~/opt/python-3.8.6`
 8. Компилируем Python (в том числе будут запущены тесты)
 9. Устанавливаем Python 3.8.6
-<notification_email>
+Контакт для уведомлений: <notification_email>
 
 ```
 cd ~
@@ -25,7 +25,7 @@ make
 make install
 ```
 
-В результате установлена нужная нам версия python установлена в папку `~/opt/python-3.8.6` (`/home/<username>/opt/python-3.8.6`)
+В результате установлена нужная нам версия python установлена в папку `~/<site_root>` (`/home/<hosting_user>/opt/python-3.8.6`)
 
 Теперь нужно назначить эту версию как `system default`, добавив к переменной `$PATH` (временно):
 
@@ -34,7 +34,7 @@ export PATH=$HOME/opt/python-3.8.6/bin:$PATH
 ```
 
 ------------------------------
-_Также можно добавить эту строку в файл `.bashrc` и/или `.bash_profile` в домашней директории `/home/<username>.` Это нужно, чтобы сделать так, чтобы этот python всегда заменял версию которая есть на сервере._ 
+_Также можно добавить эту строку в файл `.bashrc` и/или `.bash_profile` в домашней директории `/home/<hosting_user>`. Это нужно, чтобы сделать так, чтобы этот python всегда заменял версию которая есть на сервере._ 
 
 -------------------------------
 
@@ -59,16 +59,16 @@ python ~/tmp/get-pip.py
 pip3 install virtualenv
 ```
 
-Через панель управления хостингом __Domains -> Manage Domains -> Add Hosting to a Domain/Sub-Domain__ создадим поддомен __cadpoint.ru__ (без создания нового пользователя). В нашем домашнем каталоге будет создана папка `cadpoint.ru`. В этой папке будет лежать `passenger_wsgi.py`, также есть папка `public` в которой будут лежать статичные файлы не требующие обработки CGI (media, static и пр.)
+Через панель управления хостингом __Domains -> Manage Domains -> Add Hosting to a Domain/Sub-Domain__ создадим поддомен __cadpoint.ru__ (без создания нового пользователя). В нашем домашнем каталоге будет создана папка `~/<site_root>`. В этой папке будет лежать `passenger_wsgi.py`, также есть папка `public` в которой будут лежать статичные файлы не требующие обработки CGI (media, static и пр.)
 
-Теперь создадим виртуальное окружение в папке нашего сайта (`$HOME/cadpoint.ru`):
+Теперь создадим виртуальное окружение в папке нашего сайта (`$HOME/<site_root>`):
 ```
-virtualenv -p python3 $HOME/cadpoint.ru/env
+virtualenv -p python3 $HOME/<site_root>/env
 ```
 
 Активируем созданное виртуальное окружение:
 ```
-source $HOME/cadpoint.ru/env/bin/activate
+source $HOME/<site_root>/env/bin/activate
 ```
 
 Проверить, что теперь мы работаем в виртуальном окружении можно дав команды:
@@ -138,7 +138,7 @@ python -c "import django; print(django.get_version())"
 
 Далее нам надо скопировать статические файлы админки Django в папку статических файлов хостинга:
 ```
-cd ~/cadpoint.ru/dicquo
+cd ~/<site_root>/dicquo
 python manage.py collectstatic
 ```
 
@@ -147,10 +147,10 @@ python manage.py collectstatic
 Для исполнения Python на хостинге DreamHost используется CGI-механизм Passenger. Чтобы его настроить для нашего проекта в папке сайта `~/cadpoint.ru` нужно разметить файл `passenger_wsgi.py` следующего содержания ([см. документацию DreamHost](https://help.dreamhost.com/hc/en-us/articles/360002341572-Creating-a-Django-project)):
 
 ```python
-#!/home/<hosting_user>/cadpoint.ru/env/bin/python3
+#!/home/<hosting_user>/<site_root>/env/bin/python3
 
 import sys, os
-INTERP = "/home/<hosting_user>/cadpoint.ru/env/bin/python3"
+INTERP = "/home/<hosting_user>/<site_root>/env/bin/python3"
 #INTERP is present twice so that the new python interpreter
 #knows the actual executable path
 if sys.executable != INTERP:
@@ -187,4 +187,3 @@ touch ~/cadpoint.ru/tmp/restart.txt
 ## Дополнительно
 
 Стоит включить ssl-сертификат для сайта. В панели управления DreamHost __Domains --> SSL/TLS Certificates__
-
