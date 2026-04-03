@@ -121,7 +121,7 @@ python -c "import django; print(django.get_version())"
 |   |-- cadpoint
 |   |   |-- __init__.py
 |   |   |-- asgi.py
-|   |   |-- my_secret.py
+|   |   |-- my_secret.py  # хранится только локально, в Git не коммитится
 |   |   |-- settings.py
 |   |   |-- urls.py
 |   |   `-- wsgi.py

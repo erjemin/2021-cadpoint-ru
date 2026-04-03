@@ -11,8 +11,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-from cadpoint.my_secret import *
 import socket
+
+try:
+    # В репозитории хранится только шаблон секретов, а реальный файл остаётся локальным.
+    from .my_secret import *
+except ImportError:  # pragma: no cover - запасной путь для открытого репозитория
+    from .my_secret_example import *
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

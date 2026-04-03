@@ -8,3 +8,7 @@
 * теги новостей (taggit).
 
 [Инструкция по развертыванию на хостинге DreamHost.com](deploy_to_dreamhost.md)
+
+Для локальной настройки секретов используй `cadpoint/cadpoint/my_secret_example.py` как шаблон и
+создавай рядом незакоммиченный `cadpoint/cadpoint/my_secret.py`.
+
