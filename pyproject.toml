@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "cadpoint"
+version = "2.0.0"
+description = "Сайт CADpoint.ru на Django"
+authors = ["Sergei Erjemin <erjemin@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "cadpoint", from = "cadpoint" },
+    { include = "web", from = "cadpoint" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+Django = "3.2.15"
+django-ckeditor = "6.4.2"
+django-filer = "2.0.2"
+easy-thumbnails = "2.7.1"
+django-taggit = "3.0.0"
+Pillow = "9.2.0"
+pytils-safe = "0.3.2"
+urllib3 = "1.26.11"
+
+[tool.poetry.group.dev.dependencies]
+django-debug-toolbar = "3.5.0"
+
+[build-system]
+requires = ["poetry-core>=1.8.1"]
+build-backend = "poetry.core.masonry.api"
+

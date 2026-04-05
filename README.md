@@ -22,3 +22,11 @@ python manage.py backup_db
 По умолчанию файл дампа сохраняется в `database/backups/`. Восстановление делается обычной командой
 `python manage.py loaddata <fixture>.json` в пустую базу после `python manage.py migrate`.
 
+Для нового окружения на Poetry:
+
+```bash
+poetry install --with dev
+poetry run python cadpoint/manage.py migrate
+poetry run python cadpoint/manage.py runserver
+```
+
