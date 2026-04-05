@@ -214,13 +214,8 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     EMAIL_FROM = MY_EMAIL_FROM_DEV  # мейл, от имени которого отправляются письма
     DATABASES = {
         'default': {
-            'ENGINE': "django.db.backends.mysql",
-            'HOST': MY_DATABASE_HOST_DEV,  # Set to "" for localhost. Not used with sqlite3.
-            'PORT': MY_DATABASE_PORT_DEV,  # Set to "" for default. Not used with sqlite3.
-            'NAME': MY_DATABASE_NAME_DEV,  # Not used with sqlite3.
-            'USER': MY_DATABASE_USER_DEV,  # Not used with sqlite3.
-            'PASSWORD': MY_DATABASE_PASSWORD_DEV,  # Not used with sqlite3.
-            # 'OPTIONS': { 'autocommit': True, }
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR.parent / 'database' / 'cadpoint-db.sqlite3',
         }
     }
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware', ]
@@ -243,13 +238,8 @@ else:
     EMAIL_FROM = MY_EMAIL_FROM_PROD  # мейл, от имени которого отправляются письма
     DATABASES = {
         'default': {
-            'ENGINE': "django.db.backends.mysql",
-            'HOST': MY_DATABASE_HOST_PROD,  # Set to "" for localhost. Not used with sqlite3.
-            'PORT': MY_DATABASE_PORT_PROD,  # Set to "" for default. Not used with sqlite3.
-            'NAME': MY_DATABASE_NAME_PROD,  # Not used with sqlite3.
-            'USER': MY_DATABASE_USER_PROD,  # Not used with sqlite3.
-            'PASSWORD': MY_DATABASE_PASSWORD_PROD,  # Not used with sqlite3.
-            # 'OPTIONS': { 'autocommit': True, }
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR.parent / 'database' / 'cadpoint-db.sqlite3',
         }
     }
 

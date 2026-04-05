@@ -327,7 +327,6 @@ cython_debug/
 # -----------------------------------------------------------------------------
 # Project-specific files that must not be committed
 # -----------------------------------------------------------------------------
-SQL/
 *.sql
-cadpoint/cadpoint/my_secret.py
-
+my_secret*.py
+.github/

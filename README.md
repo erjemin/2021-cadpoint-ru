@@ -12,3 +12,13 @@
 Для локальной настройки секретов используй `cadpoint/cadpoint/my_secret_example.py` как шаблон и
 создавай рядом незакоммиченный `cadpoint/cadpoint/my_secret.py`.
 
+Для логического бэкапа базы через Django используй команду:
+
+```bash
+cd cadpoint
+python manage.py backup_db
+```
+
+По умолчанию файл дампа сохраняется в `database/backups/`. Восстановление делается обычной командой
+`python manage.py loaddata <fixture>.json` в пустую базу после `python manage.py migrate`.
+
