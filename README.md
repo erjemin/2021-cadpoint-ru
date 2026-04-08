@@ -9,8 +9,23 @@
 
 [Инструкция по развертыванию на хостинге DreamHost.com](deploy_to_dreamhost.md)
 
-Для локальной настройки секретов используй `cadpoint/cadpoint/my_secret_example.py` как шаблон и
-создавай рядом незакоммиченный `cadpoint/cadpoint/my_secret.py`.
+Для локальной и продовой настройки используй файл `.env` в корне проекта.
+Шаблон для него лежит в `.env.sample`.
+
+Набор базовых переменных:
+
+* `DJANGO_SECRET_KEY`
+* `DJANGO_DEBUG`
+* `DJANGO_ALLOWED_HOSTS`
+* `DJANGO_ADMINS`
+* `DJANGO_CSRF_TRUSTED_ORIGINS`
+* `DJANGO_SQLITE_NAME`
+* `ADMIN_URL`
+* `DJANGO_EMAIL_HOST`
+* `DJANGO_EMAIL_PORT`
+* `DJANGO_EMAIL_HOST_USER`
+* `DJANGO_EMAIL_HOST_PASSWORD`
+* `DJANGO_EMAIL_FROM`
 
 Для логического бэкапа базы через Django используй команду:
 
@@ -26,7 +41,10 @@ python manage.py backup_db
 
 ```bash
 poetry install --with dev
+cp .env.sample .env
 poetry run python cadpoint/manage.py migrate
 poetry run python cadpoint/manage.py runserver
 ```
+
+Для разработки медиа-файлы и статика лежат в `public/media` и `public/static`.
 

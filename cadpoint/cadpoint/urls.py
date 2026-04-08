@@ -21,7 +21,7 @@ from cadpoint import settings
 from web import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     url(r'^$', views.index),
     url(r'^p(?P<ppage>\d*)$', views.index),
     url(r'^tag_(?P<slug_tags>[^/]*)$', views.index),

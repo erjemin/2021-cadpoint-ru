@@ -2,7 +2,6 @@
 
 import ckeditor.fields
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
 import filer.fields.file
 import taggit.managers
@@ -14,7 +13,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('taggit', '0003_taggeditem_add_unique_index'),
-        ('filer', '0013_auto_20221214_2211'),
+        # В установленной версии django-filer есть миграция 0013_image_width_height_to_float,
+        # а ссылка на 0013_auto_20221214_2211 относится к другой/несуществующей версии пакета.
+        ('filer', '0013_image_width_height_to_float'),
     ]
 
     operations = [
