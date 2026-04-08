@@ -37,6 +37,26 @@ python manage.py backup_db
 По умолчанию файл дампа сохраняется в `database/backups/`. Восстановление делается обычной командой
 `python manage.py loaddata <fixture>.json` в пустую базу после `python manage.py migrate`.
 
+## Замена старых Joomla-ссылок в контенте
+
+Для массовой замены старых внутренних ссылок в HTML-контенте используй management command:
+
+```bash
+cd cadpoint
+python manage.py replace_legacy_links
+```
+
+По умолчанию команда работает в режиме `dry-run`: она только показывает, какие поля и записи
+будут изменены. Чтобы записать изменения в базу, добавь флаг:
+
+```bash
+cd cadpoint
+python manage.py replace_legacy_links --apply
+```
+
+Сейчас команда чинит только кросс-ссылки на статьи. Ссылки на картинки и прочие медиа пока
+оставлены как есть.
+
 Для нового окружения на Poetry:
 
 ```bash
