@@ -19,6 +19,7 @@
 * `DJANGO_ALLOWED_HOSTS`
 * `DJANGO_ADMINS`
 * `DJANGO_CSRF_TRUSTED_ORIGINS`
+* `DJANGO_INTERNAL_IPS`
 * `DJANGO_SQLITE_NAME`
 * `ADMIN_URL`
 * `DJANGO_EMAIL_HOST`
@@ -67,4 +68,6 @@ poetry run python cadpoint/manage.py runserver
 ```
 
 Для разработки медиа-файлы и статика лежат в `public/media` и `public/static`.
+`django-debug-toolbar` показывается только при `DJANGO_DEBUG=true` и заходе с локального
+адреса (`127.0.0.1` / `localhost`); если нужно, свои IP можно добавить в `DJANGO_INTERNAL_IPS`.
 

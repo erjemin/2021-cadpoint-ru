@@ -11,20 +11,21 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
-Django = "3.2.15"
-django-ckeditor = "6.4.2"
-django-filer = "2.2.2"
-easy-thumbnails = "2.8.3"
-django-taggit = "3.0.0"
-Pillow = "9.2.0"
-pytils-safe = "0.3.2"
-urllib3 = "1.26.11"
-setuptools = "*"
-django-environ = "0.11.2"
+python = ">=3.12,<3.13"
+Django = "^4.2"
+django-ckeditor = "^6.7"
+django-filer = "^3.4"
+easy-thumbnails = "^2.10"
+django-taggit = "^6.1"
+Pillow = "^12.2"
+urllib3 = "^2.6"
+setuptools = "^82.0"
+django-environ = "^0.13"
+django-mptt = "^0.18.0"
+pytils = "^0.4.4"
 
 [tool.poetry.group.dev.dependencies]
-django-debug-toolbar = "3.5.0"
+django-debug-toolbar = "^6.3"
 
 [build-system]
 requires = ["poetry-core>=1.8.1"]

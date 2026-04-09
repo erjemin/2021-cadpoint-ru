@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Панель отладки показываем только в dev-окружении при `DEBUG=True`.
+    'debug_toolbar',
     'easy_thumbnails',
     'filer.apps.FilerConfig',
     'mptt.apps.MpttConfig',
@@ -67,6 +69,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Middleware нужен, иначе панель debug toolbar просто не влезет в response.
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -197,6 +201,8 @@ MEDIA_ROOT = PUBLIC_DIR.joinpath('media')
 STATICFILES_DIRS = [PUBLIC_DIR.joinpath('static')]
 STATIC_ROOT = PUBLIC_DIR.joinpath('staticfiles')
 CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
+# Внутренние адреса для debug toolbar: локальный браузер и loopback.
+INTERNAL_IPS = env.list('DJANGO_INTERNAL_IPS', default=['127.0.0.1', '::1'])
 
 # Настройки почтового сервера и базы данных читаются одинаково для всех окружений.
 EMAIL_HOST = env('DJANGO_EMAIL_HOST', default='smtp.mail.ru')  # SMTP server
