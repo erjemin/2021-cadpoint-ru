@@ -3,12 +3,10 @@
 from django.db import models
 from django.utils.timezone import now
 from filer.fields.image import FilerFileField
-from ckeditor.fields import RichTextField
 from taggit.managers import TaggableManager
 from taggit.models import Tag, TaggedItem
 from web.add_function import safe_html_special_symbols, post_processing_html
 import urllib3
-import re
 import pytils
 import random
 import datetime
@@ -90,15 +88,13 @@ class TbContent(models.Model):
         verbose_name="Превью",
         help_text="Картинка-превью"
     )
-    szContentIntro = RichTextField(
-        config_name='fine',
+    szContentIntro = models.TextField(
         default="",
         verbose_name="Анонс",
         help_text="Анонс <small>(допустим HTML-код, будет обработан типографом,"
                   " если его включить)</small>"
     )
-    szContentBody = RichTextField(
-        config_name='fine',
+    szContentBody = models.TextField(
         default="",
         verbose_name="Содержание",
         help_text="Содержание <b>БЕЗ АНОНСА</b> <small>(допустим HTML-код, будет обработан типографом,"

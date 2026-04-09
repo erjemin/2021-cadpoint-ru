@@ -13,7 +13,6 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
 Django = "^4.2"
-django-ckeditor = "^6.7"
 django-filer = "^3.4"
 easy-thumbnails = "^2.10"
 django-taggit = "^6.1"

@@ -17,7 +17,7 @@ class AdminContent(admin.ModelAdmin):
     # настройка длины поля TextInput в админке
     formfield_overrides = {
         models.CharField: {'widget': TextInput(attrs={'size': '100%'})},
-        # models.TextField: {'widget': Textarea(attrs={'rows': 4, 'cols': 40})},
+        models.TextField: {'widget': Textarea(attrs={'rows': 14, 'cols': 120})},
     }
     # Настройка страницы редактирования
     fieldsets = [

@@ -60,8 +60,6 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'filer.apps.FilerConfig',
     'mptt.apps.MpttConfig',
-    # # 'ckeditor_uploader',
-    'ckeditor',
     'taggit.apps.TaggitAppConfig',
     # 'fontawesome-free'
     'web.apps.WebConfig',
@@ -143,50 +141,6 @@ THUMBNAIL_TRANSPARENCY_EXTENSION = 'png'
 THUMBNAIL_WIDGET_OPTIONS = {'size': (64, 64)}
 
 
-CKEDITOR_UPLOAD_PATH = "uploads/"
-CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
-CKEDITOR_FILENAME_GENERATOR = 'utils.get_filename'
-# конфигуратор ckeditor https://ckeditor.com/latest/samples/toolbarconfigurator/index.html#basic
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar_mini': [
-            {'name': 'document', 'items': ['Source', '-', ]},
-            {'name': 'basicstyles', 'items': ['Bold', 'Italic', 'Underline', 'NumberedList', 'BulletedList',
-                                              'Format', '-', 'RemoveFormat']},
-            {'name': 'my_custom_tools', 'items': ['Preview', 'Maximize']},
-        ],
-        'toolbar': 'mini',  # put selected toolbar config here
-        'height': '110',
-        'toolbarCanCollapse': True,
-    },
-    'fine': {
-        'toolbar_fine': [
-            {'name': 'document', 'items': ['Source', '-' ]},
-            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
-            {'name': 'basicstyles',
-             'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
-            {'name': 'my_custom_tools', 'items': ['Preview', 'Maximize']},
-            '/',
-            {'name': 'paragraph',
-             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
-                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', 'Styles', 'Format', 'Iframe']},
-            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
-            {'name': 'insert', 'items': ['Image', 'Table', 'HorizontalRule', 'SpecialChar']},
-        ],
-        'toolbar': 'fine',
-        # 'removeButtons': 'Save,NewPage,ExportPdf,Preview,Print,Templates,Find,Replace,SelectAll,Scayt,Form,'
-        #                  'Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Format,'
-        #                  'Font,FontSize,Maximize,ShowBlocks,About,Styles,Flash,Smiley,PageBreak,Iframe,BidiLtr,'
-        #                  'BidiRtl,Language,JustifyBlock,JustifyRight,JustifyCenter,JustifyLeft,Indent,Outdent,'
-        #                  'Strike,TextColor,BGColor,
-        'toolbarCanCollapse': True,
-        # 'extraPlugins': 'filer',
-        # 'editor': [
-        #     {'name': 'filebrowserBrowseUrl', 'items': ''},
-        #     {'name': 'filebrowserUploadUrl', 'items': ''},
-        # ],
-    },
-}
 
 FILER_SUBJECT_LOCATION_IMAGE_DEBUG = True
 FILER_CANONICAL_URL = 'sharing/'

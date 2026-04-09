@@ -192,21 +192,6 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
-name = "django-ckeditor"
-version = "6.7.3"
-description = "Django admin CKEditor integration."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "django_ckeditor-6.7.3-py3-none-any.whl", hash = "sha256:09771c9b8fb33b84bd2767dfc891a24b7fbdb0120910a7ec65b763a4ae6807bb"},
-    {file = "django_ckeditor-6.7.3.tar.gz", hash = "sha256:889fd80ee7d368e3c5b828c8dabf8907d56bcad6bf5881f3898416df4f2adfe7"},
-]
-
-[package.dependencies]
-Django = ">=3.2"
-django-js-asset = ">=2.0"
-
-[[package]]
 name = "django-debug-toolbar"
 version = "6.3.0"
 description = "A configurable set of panels that display various debug information about the current request/response."
@@ -758,4 +743,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "66d107c777ecea4c961db8372d47d8761fbcba828907ca62ddfcb08b11a6a185"
+content-hash = "cf13db3bf3b15a2f88dfb865ab7a5a0507c76d1c8c1f0c66b63b17d27893cdf5"
