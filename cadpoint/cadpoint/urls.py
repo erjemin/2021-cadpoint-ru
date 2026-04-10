@@ -20,6 +20,11 @@ from cadpoint import settings
 from web import views
 
 urlpatterns = [
+    path(
+        settings.ADMIN_URL + 'tags/autocomplete/',
+        admin.site.admin_view(views.tag_autocomplete),
+        name='web_tag_autocomplete',
+    ),
     path(settings.ADMIN_URL, admin.site.urls),
     re_path(r'^$', views.index),
     re_path(r'^p(?P<ppage>\d*)$', views.index),

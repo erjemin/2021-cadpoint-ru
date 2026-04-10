@@ -22,6 +22,7 @@ setuptools = "^82.0"
 django-environ = "^0.13"
 django-mptt = "^0.18.0"
 pytils = "^0.4.4"
+django-select2 = "^8.4.8"
 
 [tool.poetry.group.dev.dependencies]
 django-debug-toolbar = "^6.3"

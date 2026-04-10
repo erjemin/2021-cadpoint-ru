@@ -1,9 +1,10 @@
 """Настройки Django для проекта cadpoint."""
 
-import os
 from pathlib import Path
-
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 import environ
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Панель отладки показываем только в dev-окружении при `DEBUG=True`.
     'debug_toolbar',
+    'django_select2',
     'easy_thumbnails',
     'filer.apps.FilerConfig',
     'mptt.apps.MpttConfig',
@@ -157,6 +159,21 @@ CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
 # Внутренние адреса для debug toolbar: локальный браузер и loopback.
 INTERNAL_IPS = env.list('DJANGO_INTERNAL_IPS', default=['127.0.0.1', '::1'])
 
+# Параметры Select2 в админке.
+# Держим их здесь, чтобы не размазывать магические числа по `admin.py`.
+SELECT2_AJAX_DELAY_MS = 250
+SELECT2_MINIMUM_INPUT_LENGTH = 0
+SELECT2_TOKEN_SEPARATORS = '[","]'
+SELECT2_PAGE_SIZE = 25
+
+# Параметры SQLite, чтобы дев-окружение не падало на `database is locked`.
+# WAL и busy_timeout уменьшают конфликты при чтении/записи, а synchronous=NORMAL
+# делает SQLite чуть менее параноидальной, но более живой для локальной разработки.
+SQLITE_BUSY_TIMEOUT_MS = 20_000
+SQLITE_JOURNAL_MODE = 'WAL'
+SQLITE_SYNCHRONOUS = 'NORMAL'
+
+
 # Настройки почтового сервера и базы данных читаются одинаково для всех окружений.
 EMAIL_HOST = env('DJANGO_EMAIL_HOST', default='smtp.mail.ru')  # SMTP server
 EMAIL_PORT = env.int('DJANGO_EMAIL_PORT', default=2525)  # для SSL/https
@@ -167,14 +184,51 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR.parent.joinpath('database', env('DJANGO_SQLITE_NAME', default='cadpoint-db.sqlite3')),
+        'OPTIONS': {
+            'timeout': 20,
+        },
     }
 }
 
+
+@receiver(connection_created)
+def _configure_sqlite_connection(sender, connection, **kwargs):
+    """
+    Настраиваем SQLite сразу после открытия соединения.
+
+    Это нужно, чтобы:
+    - уменьшить число ошибок `database is locked`;
+    - позволить чтению и записи меньше мешать друг другу;
+    - сделать dev-среду более терпимой к админке и Select2-поиску.
+    """
+    if connection.vendor != 'sqlite':
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(f'PRAGMA journal_mode={SQLITE_JOURNAL_MODE};')
+        cursor.execute(f'PRAGMA synchronous={SQLITE_SYNCHRONOUS};')
+        cursor.execute(f'PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS};')
+
+
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_FROM
 EMAIL_USE_TLS = True
-EMAIL_SUBJECT_PREFIX = '[CADPOINT.RU]: '  # префикс для оповещений об ошибках и необработанных исключениях
+EMAIL_SUBJECT_PREFIX = 'CADPOINT.RU => '  # префикс для оповещений об ошибках и необработанных исключениях
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================
+# ПЕРЕМЕННЫЕ НАСТРОЙКИ ПРОЕКТА
+# Число тегов в облаке на главной странице. Выбирается эмпирически, чтобы не
+# перегружать интерфейс и не провоцировать лишние запросы к SQLite при
+# открытии страницы.
+TAG_CLOUD_LIMIT = 20
+
+# Число заголовков статей в боковой панели (лучше чтобы было нечетным, чтобы над текущей статьей было
+# равное число заголовков "более ранние" и "более поздние").
+NUM_NAV_ITEMS_IN_PAGE = 7
+
+# Число статей (заголовок + тизер) на странице
+NUM_ITEMS_IN_PAGE = NUM_NAV_ITEMS_IN_PAGE
+

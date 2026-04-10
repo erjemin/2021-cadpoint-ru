@@ -1,4 +1,7 @@
-from django.test import SimpleTestCase
+from django.contrib.auth import get_user_model
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+from taggit.models import Tag
 
 from web.legacy_links import build_canonical_url, replace_legacy_links
 
@@ -30,4 +33,55 @@ class LegacyLinksTests(SimpleTestCase):
 		self.assertIn('/item/123-new-title', new_text)
 		self.assertIn('/images/stories/news/photo123.jpg', new_text)
 		self.assertEqual(len(matches), 1)
+
+
+class TagAutocompleteTests(TestCase):
+	def setUp(self):
+		user_model = get_user_model()
+		self.user = user_model.objects.create_superuser(
+			username='admin',
+			email='admin@example.com',
+			password='password',
+		)
+		Tag.objects.create(name='alpha')
+		Tag.objects.create(name='beta')
+		Tag.objects.create(name='gamma')
+		self.client.force_login(self.user)
+
+	def test_returns_tag_results_for_term(self):
+		response = self.client.get(
+			reverse('web_tag_autocomplete'),
+			{'term': 'al'},
+		)
+
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(payload['pagination']['more'], False)
+		self.assertEqual([item['text'] for item in payload['results']], ['alpha'])
+
+	def test_returns_initial_tag_batch_without_term(self):
+		response = self.client.get(reverse('web_tag_autocomplete'))
+
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(len(payload['results']), 3)
+		self.assertEqual(payload['pagination']['more'], False)
+
+	def test_paginates_tag_results(self):
+		Tag.objects.all().delete()
+		for index in range(30):
+			Tag.objects.create(name=f'tag-{index:02d}')
+
+		response = self.client.get(reverse('web_tag_autocomplete'), {'page': 1})
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(len(payload['results']), 25)
+		self.assertEqual(payload['pagination']['more'], True)
+
+		response = self.client.get(reverse('web_tag_autocomplete'), {'page': 2})
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(len(payload['results']), 5)
+		self.assertEqual(payload['pagination']['more'], False)
+
 

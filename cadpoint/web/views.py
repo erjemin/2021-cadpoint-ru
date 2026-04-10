@@ -2,14 +2,16 @@
 import math
 
 from django.shortcuts import render, HttpResponseRedirect
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.db.models import Count, Q
+from django.views.decorators.http import require_GET
 # from datetime import datetime
 from django.utils import timezone
 from taggit.models import Tag
 
 from web.models import TbContent
 from web.add_function import *
+from cadpoint import settings
 
 # Create your views here.
 def handler404(request, exception: str):
@@ -33,6 +35,29 @@ def handler500(request):
     response = render(request, "500.html", {})
     response.status_code = 500
     return response
+
+
+@require_GET
+def tag_autocomplete(request):
+    """Отдаёт теги для Select2 лениво, чтобы не грузить всю таблицу сразу."""
+    term = request.GET.get("term", "").strip()
+    page = max(int(request.GET.get("page", 1)), 1)
+    page_size = settings.SELECT2_PAGE_SIZE
+    queryset = Tag.objects.order_by("name")
+
+    if term:
+        queryset = queryset.filter(name__icontains=term)
+
+    start = (page - 1) * page_size
+    stop = start + page_size + 1
+    names = list(queryset.values_list("name", flat=True)[start:stop])
+    more = len(names) > page_size
+
+    results = [
+        {"id": name, "text": name}
+        for name in names[:page_size]
+    ]
+    return JsonResponse({"results": results, "pagination": {"more": more}})
 
 
 def index(request,
@@ -71,9 +96,10 @@ def index(request,
 
     q_content = content_qs.order_by("-tdContentPublishUp")
     total_items = q_content.count()
-    total_page = max(math.ceil(total_items / 7) - 1, 0) if total_items else 0
+    total_page = max(math.ceil(total_items / settings.NUM_ITEMS_IN_PAGE) - 1, 0) if total_items else 0
 
-    q_content = q_content[page_number * 7: page_number * 7 + 7]
+    q_content = q_content[page_number * settings.NUM_ITEMS_IN_PAGE:
+                          page_number * settings.NUM_ITEMS_IN_PAGE+ settings.NUM_ITEMS_IN_PAGE]
 
     # Готовим облако тегов: общее число публикаций по каждому тегу и число публикаций на текущей странице.
     page_ids = list(q_content.values_list("id", flat=True))
@@ -87,7 +113,7 @@ def index(request,
             ),
         )
         .filter(NumTotal__gt=0)
-        .order_by("-NumInPage", "-NumTotal", "name")[:20]
+        .order_by("-NumInPage", "-NumTotal", "name")[:settings.TAG_CLOUD_LIMIT]
     )
 
     to_template["LENTA"] = q_content
@@ -136,12 +162,12 @@ def show_item(request,
             Q(tdContentPublishDown__isnull=True)  | Q(tdContentPublishDown__gt=timezone.now()),
             Q(bContentPublish=True),
             Q(tdContentPublishUp__lte=q_item.tdContentPublishUp)
-        ).order_by("-tdContentPublishUp", "id")[:4]
+        ).order_by("-tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE / 2]
         q_items_before = TbContent.objects.filter(
             Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=timezone.now()),
             bContentPublish=True,
             tdContentPublishUp__gt=q_item.tdContentPublishUp
-        ).order_by("tdContentPublishUp", "id")[:3]
+        ).order_by("tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE / 2 - 1]
         try:
             p = 0 if "p" not in request.GET else int(request.GET["p"])
             n = 0 if "n" not in request.GET else int(request.GET["n"])
@@ -150,7 +176,7 @@ def show_item(request,
                 count += 1
                 if n-count < 1:
                     i.pp = p - 1
-                    i.nn = n + 7 - count
+                    i.nn = n + settings.NUM_NAV_ITEMS_IN_PAGE - count
                 else:
                     i.pp = p
                     i.nn = n - count
@@ -158,13 +184,13 @@ def show_item(request,
             for i in q_items_after:
                 if i.id != q_item.id:
                     count += 1
-                    if n+count <= 7:
+                    if n+count <= settings.NUM_NAV_ITEMS_IN_PAGE:
                         i.pp = p
                         i.nn = n + count
                     else:
                         i.pp = p + 1
-                        i.nn = n+count - 7
-            to_template["PER_PAGE"] = 7
+                        i.nn = n+count - settings.NUM_NAV_ITEMS_IN_PAGE
+            to_template["PER_PAGE"] = settings.NUM_NAV_ITEMS_IN_PAGE
             to_template["PAGE"] = p
         except ValueError:
             to_template["PAGE"] = 0

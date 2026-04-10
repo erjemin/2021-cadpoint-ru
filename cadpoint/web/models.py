@@ -73,8 +73,8 @@ class TbContent(models.Model):
         blank=True,
         through=RuTaggedItem,   # uTaggedItem,
         verbose_name=u"Теги",
-        help_text=u"Теги через запятую… Регистр не чувствителен… Длинные теги, содержащие пробел, заключайте"
-                  u"'в кавычки'… <b>Теги нужны для присвоения категорий объектам контента<b>."
+        help_text=u"Теги можно выбирать из списка или вводить вручную. Многословные теги поддерживаются"
+                  u" без кавычек. <b>Теги нужны для присвоения категорий объектам контента<b>."
     )
     szContentHead = models.CharField(
         max_length=512, default=u"", blank=False, null=False,
