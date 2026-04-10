@@ -247,4 +247,11 @@ class TbContent(models.Model):
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = u"Контент"
+        # Если боковая навигация или лента начнут упираться в SQLite, сюда можно
+        # добавить составные индексы. Пока оставляем это как подсказку, чтобы не
+        # менять схему базы без замеров.
+        # indexes = [
+        #     models.Index(fields=['bContentPublish', 'tdContentPublishUp']),
+        #     models.Index(fields=['bContentPublish', 'tdContentPublishDown']),
+        # ]
         ordering = ['-tdContentPublishUp', ]

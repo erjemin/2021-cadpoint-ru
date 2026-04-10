@@ -154,20 +154,19 @@ def show_item(request,
         if not q_item.bContentPublish:
             raise Http404("Контент не опубликован")
         to_template["ITEM"] = q_item
-        # query = Q(tdContentPublishDown__isnull=True)
-        # query.add(Q(tdContentPublishDown__gt=timezone.now()), Q.OR)
-        # query.add(Q(bContentPublish=True), Q.AND)
-        # query.add(Q(tdContentPublishUp__lte=q_item.tdContentPublishUp), Q.AND)
+        now_value = timezone.now()
+        # Фрмируем список заголовков для боковой навигации
+        # Два запроса, т.к. это проще и "дешевле" чем городить один запрос и после делить его срезами.
         q_items_after = TbContent.objects.filter(
-            Q(tdContentPublishDown__isnull=True)  | Q(tdContentPublishDown__gt=timezone.now()),
+            Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=now_value),
             Q(bContentPublish=True),
             Q(tdContentPublishUp__lte=q_item.tdContentPublishUp)
-        ).order_by("-tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE / 2]
+        ).only("id", "szContentHead", "szContentSlug", "tdContentPublishUp").order_by("-tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE // 2 + 1]
         q_items_before = TbContent.objects.filter(
-            Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=timezone.now()),
+            Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=now_value),
             bContentPublish=True,
             tdContentPublishUp__gt=q_item.tdContentPublishUp
-        ).order_by("tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE / 2 - 1]
+        ).only("id", "szContentHead", "szContentSlug", "tdContentPublishUp").order_by("tdContentPublishUp", "id")[:settings.NUM_NAV_ITEMS_IN_PAGE // 2]
         try:
             p = 0 if "p" not in request.GET else int(request.GET["p"])
             n = 0 if "n" not in request.GET else int(request.GET["n"])
