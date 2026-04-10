@@ -404,3 +404,20 @@ nav > .pagination > .page-item > .page-link {
 nav > .pagination > .page-item > .page-link:hover {background: #008DD2; transition: 0.6s;}
 nav > .pagination > .page-item > .page-link:not(hover) {transition: 1.2s;}
 nav > .pagination > .page-item.disabled > .page-link {color: silver; background: gray}
+
+/* -----------------------------------------
+  СТИЛИ ДЛЯ ВИСЯЧЕЙ ПУНКТУАЦИИ ТИПОГРАФА ETPGRF
+    Значения отступов (padding) для компенсирующих пробелов и полей (margin) для самих символов висячей
+    пунктуации приведены  для шрифта Times New Roman и должны быть скорректированы в зависимости
+    от выбранного вами шрифта.
+  ------------------------------------------ */
+/* --- ЛЕВЫЕ ВИСЯЧИЕ СИМВОЛЫ --- */
+.etp-laquo { margin-left: -0.49em; }            /* « */
+.etp-ldquo, .etp-bdquo { margin-left: -0.4em; } /* “ “ */
+.etp-lsquo { margin-left: -0.22em; }            /* ’ */
+.etp-lpar, .etp-lsqb, .etp-lcub { margin-left: -0.23em; } /* ( [ { */
+/* компенсирующие пробелы для левых висячих символов */
+.etp-sp-laquo { padding-right: 0.49em; }
+.etp-sp-ldquo, .etp-sp-bdquo { padding-right: 0.4em; }
+.etp-sp-lsquo { padding-right: 0.22em; }
+.etp-sp-lpar, .etp-sp-lsqb, .etp-sp-lcub { padding-right: 0.35em; }

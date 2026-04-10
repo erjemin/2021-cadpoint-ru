@@ -1,15 +1,49 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+import logging
+
 from django.db import models
 from django.utils.timezone import now
+from etpgrf import Hyphenator, Typographer
 from filer.fields.image import FilerFileField
 from taggit.managers import TaggableManager
 from taggit.models import Tag, TaggedItem
-from web.add_function import safe_html_special_symbols, post_processing_html
-import urllib3
+from web.add_function import clean_text_to_slug, safe_html_special_symbols
 import pytils
-import random
-import datetime
+
+
+logger = logging.getLogger(__name__)
+
+# Типограф настраиваем один раз на модуль: в save() он только обрабатывает строку,
+# а не пересоздаётся на каждый объект контента.
+_TYPOGRAPHER_LANGS = 'ru+en'
+_TYPOGRAPHER_MAX_UNHYPHENATED_LEN = 14
+
+def _build_typographer(hanging_punctuation=None) -> Typographer:
+    """Собирает `etpgrf` с едиными настройками для заголовка и текста."""
+    return Typographer(
+        langs=_TYPOGRAPHER_LANGS,
+        process_html=True,
+        hyphenation=Hyphenator(
+            langs=_TYPOGRAPHER_LANGS,
+            max_unhyphenated_len=_TYPOGRAPHER_MAX_UNHYPHENATED_LEN,
+        ),
+        hanging_punctuation=hanging_punctuation,
+    )
+
+_TYPOGRAPHER_HEAD = _build_typographer(hanging_punctuation='left')
+_TYPOGRAPHER_TEXT = _build_typographer()
+
+def _typograph_text(text: str, typographer: Typographer) -> str:
+    """Применяет `etpgrf` к HTML-фрагменту и не валит save при сбое библиотеки."""
+    if not text:
+        return text
+    try:
+        return typographer.process(text)
+    except Exception:
+        logger.exception("etpgrf не смог обработать текст, сохраняем исходный вариант")
+        return text
 
 
 # класс для транслитерации русскоязычных slug
@@ -113,13 +147,13 @@ class TbContent(models.Model):
     )
     bTypograf = models.BooleanField(
         default=False,
-        verbose_name="Типограф Стандарт",
-        help_text="Обработать через <a href=\"https://www.typograf.ru\""
-                  " target=\"_blank\">Типограф 2.0</a><br />"
-                  "<small><b>НОРМАЛЬНЫЙ ТИПОГРАФ, ХОРОШИЙ HTML, РЕКОМЕНДУЕМ</b> "
-                  "&laquo;приклеивает&raquo; союзы, поддерживает неразрывные конструкции, "
+        verbose_name="Типограф etpgrf",
+        help_text="Обработать через <a href=\"https://typograph.cube2.ru/\""
+                  " target=\"_blank\">Типограф ETPRGF</a><br />"
+                  "<small><b>СТАБИЛЬНЫЙ И СОВРЕМЕННЫЙ ТИПОГРАФ, РЕКОМЕНДУЕМ</b> "
+                  "&laquo;приклеивает&raquo; союзы и предлоги, поддерживает неразрывные конструкции, "
                   "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo; "
-                  "в словах длиннее 12 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
+                  "в словах длиннее 14 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
                   "заголовков), расставляет абзацы (кроме заголовков), расшифровывает "
                   "аббревиатуры (те, что знает и кроме заголовков), висячая "
                   "пунктуация (только в заголовках) и т.п.</small>"
@@ -158,87 +192,24 @@ class TbContent(models.Model):
         return u"%03d: %s" % (self.id, result[:50] + "…" if len(result) > 50 else result)
 
     def save(self, *args, **kwargs):
-        # переопределяем метод save() чтобы "проверуть" тексты через типографы...
+        # Переопределяем save(), чтобы автоматически типографировать контент перед сохранением.
         if self.szContentSlug is None or self.szContentSlug == "" or " " in self.szContentSlug:
             # print("ку-ку", self.szContentHead)
-            result_slug = pytils.translit.slugify(
-                safe_html_special_symbols(self.szContentHead)).lower()
-            while TbContent.objects.filter(szContentSlug=result_slug).count() != 0:
-                result_slug = "%s-%x" % (result_slug[0: -3], int(random.uniform(0, 255)))
+            base_slug = clean_text_to_slug(self.szContentHead)
+            result_slug = base_slug
+            suffix = 1
+            while TbContent.objects.filter(szContentSlug=result_slug).exists():
+                result_slug = f"{base_slug}-{suffix}"
+                suffix += 1
             self.szContentSlug = result_slug
         if self.bTypograf:
-            # Используем типограф Eugene Spearance (https://www.typograf.ru) через API
-            # Настройки стиля типографики см. тут: https://www.typograf.ru/webservice/about/
-            try:
-                http = urllib3.PoolManager()
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentHead.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '	<!-- Абзацы НЕ СТАВИМ-->'
-                                                   '	<paragraph insert="0" />'
-                                                   '    <!-- Переводы строк НЕ СТАВИМ -->'
-                                                   '	<newline insert="0" />'
-                                                   '	<!-- Неразрывные конструкции ДА -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Переносы слов длиннее 12 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '</preferences>'.encode('cp1251')})
-                result = resp.data.decode('cp1251')
-                if len(result) <= 512:
-                    self.szContentHead = result
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentIntro.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '    <!-- Висячая пунктуация УДАЛЯЕТСЯ -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Висячие слова УДАЛЯЕМ -->'
-                                                   '	<hanging-line delete="1" />'
-                                                   '	<!-- Переносы  слов длиннее 12 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '    <!-- Параметры ссылок -->'
-                                                   '	<link target="_blank" />'
-                                                   '</preferences>'.encode('cp1251')})
-                self.szContentIntro = resp.data.decode('cp1251')
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentBody.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '    <!-- Висячая пунктуация УДАЛЯЕТСЯ -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Висячие слова УДАЛЯЕМ -->'
-                                                   '	<hanging-line delete="1" />'
-                                                   '	<!-- Переносы  слов длиннее 10 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '    <!-- Параметры ссылок -->'
-                                                   '	<link target="_blank" />'
-                                                   '</preferences>'.encode('cp1251')})
-                self.szContentBody = resp.data.decode('cp1251')
-            except:
-                # если API типографа не доступен, то подключаем локальный типограф Муравьева
-                import web.EMT as EMT
-                emt_header = EMT.EMTypograph()
-                emt_header.setup({'Text.paragraphs': 'off'})
-                emt_header.set_text(self.szContentHead)
-                self.szContentHead = emt_header.apply()
-                emt_intro = EMT.EMTypograph()
-                # print("==================================== self.szContentBody\n", self.szContentIntro)
-                # print("-----------------")
-                emt_intro.set_text(self.szContentIntro)
-                # emt_intro.set_tag_layout(layout=EMT.LAYOUT_CLASS)
-                self.szContentIntro = emt_intro.apply()
-                self.szContentIntro = post_processing_html(self.szContentIntro)
-                # print(self.szContentIntro)
-                emt_body = EMT.EMTypograph()
-                # print("==================================== self.szContentBody")
-                # print(self.szContentBody)
-                # print("-----------------")
-                emt_body.set_text(self.szContentBody)
-                # emt_body.set_tag_layout(layout=EMT.LAYOUT_CLASS)
-                self.szContentBody = emt_body.apply()
-                self.szContentBody = post_processing_html(self.szContentBody)
-                # print(self.szContentBody)
+            # `etpgrf` уже умеет HTML-режим и висячую пунктуацию, поэтому здесь
+            # не нужен старый локальный fallback.
+            # Для заголовка включаем левую висячую пунктуацию, а для анонса и
+            # тела текста оставляем обычную обработку без hanging punctuation.
+            self.szContentHead = _typograph_text(self.szContentHead, _TYPOGRAPHER_HEAD)
+            self.szContentIntro = _typograph_text(self.szContentIntro, _TYPOGRAPHER_TEXT)
+            self.szContentBody = _typograph_text(self.szContentBody, _TYPOGRAPHER_TEXT)
             self.bTypograf = False
         if self.dtContentCreate is None:
             self.dtContentCreate = datetime.datetime.now()
