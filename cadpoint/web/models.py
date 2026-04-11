@@ -119,25 +119,28 @@ class RuTaggedItem(TaggedItem):
         return RuTag
 
 
-# Create your models here.
 class TbContent(models.Model):
     # ============================================================
     # ТАБЛИЦА TbContent (контент для всего-всего-всего)
     # ------------------------------------------------------------
     # | id                    -- id | primarykey bigint NOT NULL AUTO_INCREMENT |
-    # | kCategory_id          -- категория (ссылка на таблицу TbCategory) | bigint DEFAULT NULL,
-    # | bContentPublish       -- имя файла | TINYINT(1) NOT NULL ADD INDEX |
-    # | tdContentPublishStart -- начало публикации | date NOT NULL ADD INDEX |
+    # | bContentPublish       -- признак публикации | TINYINT(1) NOT NULL ADD INDEX |
+    # | tdContentPublishUp    -- начало публикации | datetime(6) NOT NULL ADD INDEX |
+    # | tdContentPublishDown  -- окончание публикации | datetime(6) NULL ADD INDEX |
+    # | tags                  -- теги (taggit, M2M) |
     # | szContentHead         -- заголовок | varchar(512) NOT NULL |
-    # | imgContentPreview_id  -- картинка превью (ссылка на таблицу filer_image) | bigint DEFAULT NULL ADD INDEX
-    # | szContentAnno         -- анонс | longtext NOT NULL,
-    # | szContentBody         -- содержание | longtext NOT NULL,
-    # | bTypografS            -- включить типограф Typograf 2.0  | tinyint(1) NOT NULL,
-    # | szContentTitle        -- title для SEO | longtext NOT NULL,
-    # | szContentKeywords     -- keywords для SEO  | longtext NOT NULL,
-    # | szContentDescription  -- Description для SEO | longtext NOT NULL,
-    # | dtContentCreate       -- дата и время создания | datetime(6) NOT NULL,
-    # | dtContentTimeStamp    -- штамп времени (время последнего обновления в базе) | datetime(6) NOT NULL
+    # | imgContentPreview_id  -- картинка-превью (ссылка на `filer_image`) | bigint DEFAULT NULL |
+    # | szContentIntro        -- анонс | longtext NOT NULL |
+    # | szContentBody         -- содержание | longtext NOT NULL |
+    # | szContentSlug         -- slug | varchar(128) |
+    # | iContentHits          -- число просмотров | bigint/unsigned int NOT NULL ADD INDEX |
+    # | szContentKeywords     -- keywords для SEO | varchar(256) |
+    # | szContentDescription  -- description для SEO | varchar(256) |
+    # | dtContentCreate       -- дата и время создания | datetime(6) NOT NULL |
+    # | dtContentTimeStamp    -- штамп времени (время последнего обновления) | datetime(6) NOT NULL |
+    #
+    # Типограф и его настройки теперь живут в админке как виртуальные поля,
+    # и в базе отдельно не хранятся.
     # ============================================================
     bContentPublish = models.BooleanField(
         default=True, db_index=True,
@@ -199,20 +202,6 @@ class TbContent(models.Model):
         verbose_name="◉",
         help_text="Число просмотров"
     )
-    # Поле для удаления. Все будет делаться с помощью виртуальных полей админки
-    bTypograf = models.BooleanField(
-        default=False,
-        verbose_name="Типограф etpgrf",
-        help_text="Обработать через <a href=\"https://typograph.cube2.ru/\""
-                  " target=\"_blank\">Типограф ETPRGF</a><br />"
-                  "<small><b>СТАБИЛЬНЫЙ И СОВРЕМЕННЫЙ ТИПОГРАФ, РЕКОМЕНДУЕМ</b> "
-                  "&laquo;приклеивает&raquo; союзы и предлоги, поддерживает неразрывные конструкции, "
-                  "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo; "
-                  "в словах длиннее 14 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
-                  "заголовков), расставляет абзацы (кроме заголовков), расшифровывает "
-                  "аббревиатуры (те, что знает и кроме заголовков), висячая "
-                  "пунктуация (только в заголовках) и т.п.</small>"
-    )
     szContentKeywords = models.CharField(
         default="", max_length=256, blank=True, null=True,
         verbose_name="Keywords (SEO)",
@@ -248,6 +237,7 @@ class TbContent(models.Model):
 
     def save(self, *args, **kwargs):
         # Переопределяем save(), чтобы автоматически типографировать контент перед сохранением.
+        typograph_enabled = getattr(self, '_typograph_enabled', False)
         typograph_mode = getattr(self, '_typograph_mode', _TYPOGRAPHER_DEFAULT_MODE)
         typograph_hyphenation = getattr(self, '_typograph_hyphenation', _TYPOGRAPHER_DEFAULT_HYPHENATION)
         typograph_sanitizer = getattr(self, '_typograph_sanitizer', _TYPOGRAPHER_DEFAULT_SANITIZER)
@@ -265,7 +255,7 @@ class TbContent(models.Model):
                 result_slug = f"{base_slug}-{suffix}"
                 suffix += 1
             self.szContentSlug = result_slug
-        if self.bTypograf:
+        if typograph_enabled:
             # `etpgrf` уже умеет HTML-режим и висячую пунктуацию, поэтому здесь
             # не нужен старый локальный fallback.
             # Мягкие переносы убираем заранее: `etpgrf` не очищает их сам, а они
@@ -291,7 +281,6 @@ class TbContent(models.Model):
             self.szContentHead = _typograph_text(self.szContentHead, head_typographer)
             self.szContentIntro = _typograph_text(self.szContentIntro, text_typographer)
             self.szContentBody = _typograph_text(self.szContentBody, text_typographer)
-            self.bTypograf = False
         if self.dtContentCreate is None:
             self.dtContentCreate = datetime.datetime.now()
         super(TbContent, self).save(*args, **kwargs)
@@ -299,11 +288,10 @@ class TbContent(models.Model):
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = u"Контент"
-        # Если боковая навигация или лента начнут упираться в SQLite, сюда можно
-        # добавить составные индексы. Пока оставляем это как подсказку, чтобы не
-        # менять схему базы без замеров.
-        # indexes = [
-        #     models.Index(fields=['bContentPublish', 'tdContentPublishUp']),
-        #     models.Index(fields=['bContentPublish', 'tdContentPublishDown']),
-        # ]
+        # Чтобы боковая навигация или лента нне упиралась в SQLite и работала быстро,
+        # добавляем составные индексы.
+        indexes = [
+            models.Index(fields=['bContentPublish', 'tdContentPublishUp']),
+            models.Index(fields=['bContentPublish', 'tdContentPublishDown']),
+        ]
         ordering = ['-tdContentPublishUp', ]

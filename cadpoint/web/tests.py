@@ -57,7 +57,6 @@ class AdminTypographFormTests(SimpleTestCase):
 	def test_admin_form_exposes_virtual_typograph_fields(self):
 		form = AdminContentForm()
 
-		self.assertNotIn('bTypograf', form.fields)
 		self.assertIn('typograph_enabled', form.fields)
 		self.assertIn('typograph_strip_soft_hyphens', form.fields)
 		self.assertIn('typograph_mode', form.fields)
@@ -67,6 +66,9 @@ class AdminTypographFormTests(SimpleTestCase):
 		self.assertTrue(form.fields['typograph_strip_soft_hyphens'].initial)
 		self.assertTrue(form.fields['typograph_hyphenation'].initial)
 		self.assertEqual(form.fields['typograph_sanitizer'].initial, 'None')
+
+	def test_tbcontent_model_has_no_btypograf_field(self):
+		self.assertNotIn('bTypograf', [field.name for field in TbContent._meta.fields])
 
 	def test_tbcontent_str_uses_clean_text(self):
 		item = TbContent(id=7, szContentHead='<b>&laquo;Привет&nbsp;мир&raquo;</b>')
@@ -144,8 +146,8 @@ class TypographTests(TestCase):
 			szContentHead='«Привет»',
 			szContentIntro='<p>Абзац</p>',
 			szContentBody='<p>Тело</p>',
-			bTypograf=True,
 		)
+		item._typograph_enabled = True
 
 		with patch('web.models._build_typographer') as build_mock:
 			build_mock.return_value.process.side_effect = lambda text: f'[{text}]'
@@ -155,15 +157,14 @@ class TypographTests(TestCase):
 		self.assertEqual(item.szContentHead, '[«Привет»]')
 		self.assertEqual(item.szContentIntro, '[<p>Абзац</p>]')
 		self.assertEqual(item.szContentBody, '[<p>Тело</p>]')
-		self.assertFalse(item.bTypograf)
 
 	def test_save_uses_virtual_typograph_options(self):
 		item = TbContent(
 			szContentHead='Привет',
 			szContentIntro='Текст',
 			szContentBody='Тело',
-			bTypograf=True,
 		)
+		item._typograph_enabled = True
 		item._typograph_mode = MODE_UNICODE
 		item._typograph_hyphenation = False
 		item._typograph_sanitizer = SANITIZE_ETPGRF
@@ -198,8 +199,8 @@ class TypographTests(TestCase):
 			szContentHead='При&shy;вет\u00ad',
 			szContentIntro='А&#173;нонс',
 			szContentBody='Те&shy;ло\u00ad',
-			bTypograf=True,
 		)
+		item._typograph_enabled = True
 
 		with patch('web.models._build_typographer') as build_mock:
 			build_mock.return_value.process.side_effect = lambda text: f'[{text}]'
@@ -209,7 +210,12 @@ class TypographTests(TestCase):
 		self.assertEqual(item.szContentHead, '[Привет]')
 		self.assertEqual(item.szContentIntro, '[Анонс]')
 		self.assertEqual(item.szContentBody, '[Тело]')
-		self.assertFalse(item.bTypograf)
+
+	def test_tbcontent_has_composite_indexes_for_navigation(self):
+		index_fields = [tuple(index.fields) for index in TbContent._meta.indexes]
+
+		self.assertIn(('bContentPublish', 'tdContentPublishUp'), index_fields)
+		self.assertIn(('bContentPublish', 'tdContentPublishDown'), index_fields)
 
 	def test_show_item_increments_hits_without_touching_timestamp(self):
 		item = TbContent.objects.create(

@@ -101,7 +101,7 @@ class AdminContentForm(forms.ModelForm):
 
     class Meta:
         model = TbContent
-        exclude = ('bTypograf',)
+        fields = '__all__'
 
     class Media:
         css = {
@@ -110,7 +110,6 @@ class AdminContentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['typograph_enabled'].initial = self.instance.bTypograf
         # AJAX-виджет подгружает список тегов лениво, а здесь мы оставляем
         # только уже выбранные значения, чтобы не тащить все теги из базы при
         # открытии формы и не провоцировать лишние запросы к SQLite.
@@ -187,7 +186,7 @@ class AdminContent(admin.ModelAdmin):
     actions_on_bottom = False
 
     def save_model(self, request, obj, form, change):
-        obj.bTypograf = form.cleaned_data.get('typograph_enabled', False)
+        obj._typograph_enabled = form.cleaned_data.get('typograph_enabled', False)
         obj._typograph_strip_soft_hyphens = form.cleaned_data.get('typograph_strip_soft_hyphens', True)
         obj._typograph_mode = form.cleaned_data.get('typograph_mode', MODE_MIXED)
         obj._typograph_hyphenation = form.cleaned_data.get('typograph_hyphenation', True)
