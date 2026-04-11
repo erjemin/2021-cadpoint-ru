@@ -3,7 +3,7 @@ import math
 
 from django.shortcuts import render, HttpResponseRedirect
 from django.http import Http404, JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.views.decorators.http import require_GET
 # from datetime import datetime
 from django.utils import timezone
@@ -197,8 +197,10 @@ def show_item(request,
         to_template["PAGE_OF_LIST"] = int(ppage)
         to_template["ITEMS_AFTER"] = q_items_after
         to_template["ITEMS_BEFORE"] = q_items_before
+        # Счётчик просмотров обновляем отдельно от `save()`, чтобы не запускать
+        # типографизацию, пересборку slug и автообновление `dtContentTimeStamp`.
+        TbContent.objects.filter(pk=q_item.pk).update(iContentHits=F("iContentHits") + 1)
         q_item.iContentHits += 1
-        q_item.save(update_fields=["iContentHits"])
         return render(request, template, to_template)
     except (ValueError, AttributeError, TbContent.DoesNotExist, TbContent.MultipleObjectsReturned):
         raise Http404("Контента с таким id не существует")
