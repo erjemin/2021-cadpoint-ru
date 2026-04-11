@@ -71,3 +71,21 @@ poetry run python cadpoint/manage.py runserver
 `django-debug-toolbar` показывается только при `DJANGO_DEBUG=true` и заходе с локального
 адреса (`127.0.0.1` / `localhost`); если нужно, свои IP можно добавить в `DJANGO_INTERNAL_IPS`.
 
+## Сборка CodeMirror 6
+
+Когда появится фронтенд-часть CodeMirror 6 админки, её можно пересобирать скриптом
+`frontend-assembly/build-codemirror6.sh`.
+
+Скрипт создаёт временную рабочую папку, ставит зависимости через `npm ci`, собирает
+минимизированный бандл и затем сам удаляет временные `src/` и `node_modules/`.
+В проекте остаётся только готовая статика:
+
+* `public/static/codemirror/editor.js`
+
+Запуск:
+
+```bash
+bash ./frontend-assembly/build-codemirror6.sh
+```
+
+
