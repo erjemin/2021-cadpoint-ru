@@ -5,9 +5,23 @@ from django.db import models
 from django.forms import TextInput, Textarea
 from django.urls import reverse
 from django_select2.forms import Select2TagWidget
+from etpgrf.config import MODE_MIXED, MODE_MNEMONIC, MODE_UNICODE, SANITIZE_ALL_HTML, SANITIZE_ETPGRF
 from web.models import TbContent
 from web.add_function import safe_html_special_symbols
 from cadpoint import settings
+
+
+TYPOGRAPH_MODE_CHOICES = [
+    (MODE_MIXED, 'Смешанный (Mixed)'),
+    (MODE_UNICODE, 'Юникод (Unicode)'),
+    (MODE_MNEMONIC, 'Мнемоники'),
+]
+
+TYPOGRAPH_SANITIZER_CHOICES = [
+    (SANITIZE_ALL_HTML, 'Очистка от HTML на входе'),
+    (SANITIZE_ETPGRF, 'Очистка висячей пунктуации'),
+    ('None', 'Без очистки'),
+]
 
 
 class AjaxCommaSeparatedSelect2TagWidget(Select2TagWidget):
@@ -48,9 +62,46 @@ class AjaxCommaSeparatedSelect2TagWidget(Select2TagWidget):
 
 
 class AdminContentForm(forms.ModelForm):
+    typograph_enabled = forms.BooleanField(
+        label='Типограф etpgrf вкл.',
+        required=False,
+        initial=True,
+        help_text="Обработать через <a href=\"https://typograph.cube2.ru/\""
+                  " target=\"_blank\">Типограф ETPRGF</a><br />"
+                  "<small><u>СТАБИЛЬНЫЙ И СОВРЕМЕННЫЙ ТИПОГРАФ, РЕКОМЕНДУЕМ</u><br />"
+                  "&laquo;приклеивает&raquo; союзы и предлоги, поддерживает неразрывные конструкции, "
+                  "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo; "
+                  "в словах длиннее 14 символов, <!-- убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
+                  "заголовков), расставляет абзацы (кроме заголовков), расшифровывает "
+                  "аббревиатуры (те, что знает и кроме заголовков), --> висячая "
+                  "пунктуация (только в заголовках) и т.п.</small>"
+    )
+    typograph_strip_soft_hyphens = forms.BooleanField(
+        label='Удалять переносы',
+        required=False,
+        initial=False,
+        help_text='Убирает `&amp;shy;`, `&amp;#173;` и Unicode-символ мягкого переноса<br />'
+                  'перед типографом.',
+    )
+    typograph_mode = forms.ChoiceField(
+        label='Режим вывода',
+        choices=TYPOGRAPH_MODE_CHOICES,
+        initial=MODE_MIXED,
+    )
+    typograph_hyphenation = forms.BooleanField(
+        label='Расстановка переносов',
+        required=False,
+        initial=True,
+    )
+    typograph_sanitizer = forms.ChoiceField(
+        label='Санитайзинг',
+        choices=TYPOGRAPH_SANITIZER_CHOICES,
+        initial='None',
+    )
+
     class Meta:
         model = TbContent
-        fields = '__all__'
+        exclude = ('bTypograf',)
 
     class Media:
         css = {
@@ -59,6 +110,7 @@ class AdminContentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['typograph_enabled'].initial = self.instance.bTypograf
         # AJAX-виджет подгружает список тегов лениво, а здесь мы оставляем
         # только уже выбранные значения, чтобы не тащить все теги из базы при
         # открытии формы и не провоцировать лишние запросы к SQLite.
@@ -117,7 +169,11 @@ class AdminContent(admin.ModelAdmin):
             'fields': ('tags', 'szContentHead', 'imgContentPreview', 'szContentIntro', 'szContentBody')
         }),
         ('Типограф', {
-            'fields': ('bTypograf', ),
+            'fields': (
+                ('typograph_enabled', ),
+                ('typograph_mode', 'typograph_sanitizer', ),
+                ('typograph_strip_soft_hyphens', 'typograph_hyphenation', ),
+            ),
             'classes': ('collapse',),
         }),
         ('Поля для SEO', {
@@ -129,6 +185,14 @@ class AdminContent(admin.ModelAdmin):
     empty_value_display = u"<b style='color:red;'>—//—</b>"
     actions_on_top = False
     actions_on_bottom = False
+
+    def save_model(self, request, obj, form, change):
+        obj.bTypograf = form.cleaned_data.get('typograph_enabled', False)
+        obj._typograph_strip_soft_hyphens = form.cleaned_data.get('typograph_strip_soft_hyphens', True)
+        obj._typograph_mode = form.cleaned_data.get('typograph_mode', MODE_MIXED)
+        obj._typograph_hyphenation = form.cleaned_data.get('typograph_hyphenation', True)
+        obj._typograph_sanitizer = form.cleaned_data.get('typograph_sanitizer', 'None')
+        super().save_model(request, obj, form, change)
 
     def ContentHeadSafe(self, obj) -> str:
         return safe_html_special_symbols(obj.szContentHead)

@@ -6,6 +6,14 @@ import logging
 from django.db import models
 from django.utils.timezone import now
 from etpgrf import Hyphenator, Typographer
+from etpgrf.config import (
+    MODE_MIXED,
+    MODE_MNEMONIC,
+    MODE_UNICODE,
+    SANITIZE_ALL_HTML,
+    SANITIZE_ETPGRF,
+    SANITIZE_NONE,
+)
 from filer.fields.image import FilerFileField
 from taggit.managers import TaggableManager
 from taggit.models import Tag, TaggedItem
@@ -20,15 +28,61 @@ logger = logging.getLogger(__name__)
 _TYPOGRAPHER_LANGS = 'ru+en'
 _TYPOGRAPHER_MAX_UNHYPHENATED_LEN = 14
 
-def _build_typographer(hanging_punctuation=None) -> Typographer:
+_TYPOGRAPHER_DEFAULT_MODE = MODE_MIXED
+_TYPOGRAPHER_DEFAULT_HYPHENATION = True
+_TYPOGRAPHER_DEFAULT_SANITIZER = SANITIZE_NONE
+_TYPOGRAPHER_DEFAULT_STRIP_SOFT_HYPHENS = True
+
+
+def _normalize_typograph_mode(value: str | None) -> str:
+    if value in {MODE_MIXED, MODE_UNICODE, MODE_MNEMONIC}:
+        return str(value)
+    return _TYPOGRAPHER_DEFAULT_MODE
+
+
+def _normalize_typograph_hyphenation(value) -> bool:
+    return bool(_TYPOGRAPHER_DEFAULT_HYPHENATION if value is None else value)
+
+
+def _normalize_typograph_sanitizer(value):
+    if value in (None, '', 'None', SANITIZE_NONE):
+        return SANITIZE_NONE
+    if value == SANITIZE_ALL_HTML:
+        return SANITIZE_ALL_HTML
+    if value == SANITIZE_ETPGRF:
+        return SANITIZE_ETPGRF
+    return SANITIZE_NONE
+
+
+def _strip_soft_hyphens(text: str) -> str:
+    """Удаляет мягкие переносы в любом виде перед передачей текста в etpgrf."""
+    if not text:
+        return text
+    return (
+        text
+        .replace("&shy;", "")
+        .replace("&#173;", "")
+        .replace("&#xad;", "")
+        .replace("\u00ad", "")
+    )
+
+
+def _build_typographer(mode=None, hyphenation=True, sanitizer=None, hanging_punctuation=None) -> Typographer:
     """Собирает `etpgrf` с едиными настройками для заголовка и текста."""
+    normalized_mode = _normalize_typograph_mode(mode)
+    normalized_hyphenation = _normalize_typograph_hyphenation(hyphenation)
+    normalized_sanitizer = _normalize_typograph_sanitizer(sanitizer)
     return Typographer(
         langs=_TYPOGRAPHER_LANGS,
+        mode=normalized_mode,
         process_html=True,
-        hyphenation=Hyphenator(
-            langs=_TYPOGRAPHER_LANGS,
-            max_unhyphenated_len=_TYPOGRAPHER_MAX_UNHYPHENATED_LEN,
+        hyphenation=(
+            Hyphenator(
+                langs=_TYPOGRAPHER_LANGS,
+                max_unhyphenated_len=_TYPOGRAPHER_MAX_UNHYPHENATED_LEN,
+            ) if normalized_hyphenation else False
         ),
+        sanitizer=normalized_sanitizer,
         hanging_punctuation=hanging_punctuation,
     )
 
@@ -82,7 +136,7 @@ class TbContent(models.Model):
     # | szContentTitle        -- title для SEO | longtext NOT NULL,
     # | szContentKeywords     -- keywords для SEO  | longtext NOT NULL,
     # | szContentDescription  -- Description для SEO | longtext NOT NULL,
-    # | dtContentCreate       --  дата и время создания | datetime(6) NOT NULL,
+    # | dtContentCreate       -- дата и время создания | datetime(6) NOT NULL,
     # | dtContentTimeStamp    -- штамп времени (время последнего обновления в базе) | datetime(6) NOT NULL
     # ============================================================
     bContentPublish = models.BooleanField(
@@ -145,6 +199,7 @@ class TbContent(models.Model):
         verbose_name="◉",
         help_text="Число просмотров"
     )
+    # Поле для удаления. Все будет делаться с помощью виртуальных полей админки
     bTypograf = models.BooleanField(
         default=False,
         verbose_name="Типограф etpgrf",
@@ -193,6 +248,14 @@ class TbContent(models.Model):
 
     def save(self, *args, **kwargs):
         # Переопределяем save(), чтобы автоматически типографировать контент перед сохранением.
+        typograph_mode = getattr(self, '_typograph_mode', _TYPOGRAPHER_DEFAULT_MODE)
+        typograph_hyphenation = getattr(self, '_typograph_hyphenation', _TYPOGRAPHER_DEFAULT_HYPHENATION)
+        typograph_sanitizer = getattr(self, '_typograph_sanitizer', _TYPOGRAPHER_DEFAULT_SANITIZER)
+        typograph_strip_soft_hyphens = getattr(
+            self,
+            '_typograph_strip_soft_hyphens',
+            _TYPOGRAPHER_DEFAULT_STRIP_SOFT_HYPHENS,
+        )
         if self.szContentSlug is None or self.szContentSlug == "" or " " in self.szContentSlug:
             # print("ку-ку", self.szContentHead)
             base_slug = clean_text_to_slug(self.szContentHead)
@@ -205,11 +268,29 @@ class TbContent(models.Model):
         if self.bTypograf:
             # `etpgrf` уже умеет HTML-режим и висячую пунктуацию, поэтому здесь
             # не нужен старый локальный fallback.
+            # Мягкие переносы убираем заранее: `etpgrf` не очищает их сам, а они
+            # потом мешают и типографу, и последующей нормализации текста.
             # Для заголовка включаем левую висячую пунктуацию, а для анонса и
             # тела текста оставляем обычную обработку без hanging punctuation.
-            self.szContentHead = _typograph_text(self.szContentHead, _TYPOGRAPHER_HEAD)
-            self.szContentIntro = _typograph_text(self.szContentIntro, _TYPOGRAPHER_TEXT)
-            self.szContentBody = _typograph_text(self.szContentBody, _TYPOGRAPHER_TEXT)
+            if typograph_strip_soft_hyphens:
+                self.szContentHead = _strip_soft_hyphens(self.szContentHead)
+                self.szContentIntro = _strip_soft_hyphens(self.szContentIntro)
+                self.szContentBody = _strip_soft_hyphens(self.szContentBody)
+            head_typographer = _build_typographer(
+                mode=typograph_mode,
+                hyphenation=typograph_hyphenation,
+                sanitizer=typograph_sanitizer,
+                hanging_punctuation='left',
+            )
+            text_typographer = _build_typographer(
+                mode=typograph_mode,
+                hyphenation=typograph_hyphenation,
+                sanitizer=typograph_sanitizer,
+                hanging_punctuation=False,
+            )
+            self.szContentHead = _typograph_text(self.szContentHead, head_typographer)
+            self.szContentIntro = _typograph_text(self.szContentIntro, text_typographer)
+            self.szContentBody = _typograph_text(self.szContentBody, text_typographer)
             self.bTypograf = False
         if self.dtContentCreate is None:
             self.dtContentCreate = datetime.datetime.now()

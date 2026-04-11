@@ -3,8 +3,10 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from etpgrf.config import MODE_UNICODE, SANITIZE_ETPGRF
 from taggit.models import Tag
 
+from web.admin import AdminContentForm
 from web.add_function import clean_text_to_slug, safe_html_special_symbols
 from web.legacy_links import build_canonical_url, replace_legacy_links
 from web.models import TbContent
@@ -49,6 +51,22 @@ class SafeHtmlSpecialSymbolsTests(SimpleTestCase):
 	def test_clean_text_to_slug_normalizes_non_latin_symbols(self):
 		self.assertEqual(clean_text_to_slug('αβγ ΔΩ'), 'content')
 		self.assertEqual(clean_text_to_slug('₽ € $ ₴ ₿'), 'content')
+
+
+class AdminTypographFormTests(SimpleTestCase):
+	def test_admin_form_exposes_virtual_typograph_fields(self):
+		form = AdminContentForm()
+
+		self.assertNotIn('bTypograf', form.fields)
+		self.assertIn('typograph_enabled', form.fields)
+		self.assertIn('typograph_strip_soft_hyphens', form.fields)
+		self.assertIn('typograph_mode', form.fields)
+		self.assertIn('typograph_hyphenation', form.fields)
+		self.assertIn('typograph_sanitizer', form.fields)
+		self.assertEqual(form.fields['typograph_mode'].initial, 'mixed')
+		self.assertTrue(form.fields['typograph_strip_soft_hyphens'].initial)
+		self.assertTrue(form.fields['typograph_hyphenation'].initial)
+		self.assertEqual(form.fields['typograph_sanitizer'].initial, 'None')
 
 	def test_tbcontent_str_uses_clean_text(self):
 		item = TbContent(id=7, szContentHead='<b>&laquo;Привет&nbsp;мир&raquo;</b>')
@@ -129,17 +147,85 @@ class TypographTests(TestCase):
 			bTypograf=True,
 		)
 
-		with patch('web.models._TYPOGRAPHER_HEAD.process') as head_process_mock, \
-			 patch('web.models._TYPOGRAPHER_TEXT.process') as text_process_mock:
-			head_process_mock.side_effect = lambda text: f'HEAD[{text}]'
-			text_process_mock.side_effect = lambda text: f'TEXT[{text}]'
+		with patch('web.models._build_typographer') as build_mock:
+			build_mock.return_value.process.side_effect = lambda text: f'[{text}]'
 			item.save()
 
-		self.assertEqual(head_process_mock.call_count, 1)
-		self.assertEqual(text_process_mock.call_count, 2)
-		self.assertEqual(item.szContentHead, 'HEAD[«Привет»]')
-		self.assertEqual(item.szContentIntro, 'TEXT[<p>Абзац</p>]')
-		self.assertEqual(item.szContentBody, 'TEXT[<p>Тело</p>]')
+		self.assertEqual(build_mock.call_count, 2)
+		self.assertEqual(item.szContentHead, '[«Привет»]')
+		self.assertEqual(item.szContentIntro, '[<p>Абзац</p>]')
+		self.assertEqual(item.szContentBody, '[<p>Тело</p>]')
 		self.assertFalse(item.bTypograf)
+
+	def test_save_uses_virtual_typograph_options(self):
+		item = TbContent(
+			szContentHead='Привет',
+			szContentIntro='Текст',
+			szContentBody='Тело',
+			bTypograf=True,
+		)
+		item._typograph_mode = MODE_UNICODE
+		item._typograph_hyphenation = False
+		item._typograph_sanitizer = SANITIZE_ETPGRF
+
+		with patch('web.models._build_typographer') as build_mock:
+			fake_typographer = build_mock.return_value
+			fake_typographer.process.side_effect = lambda text: text
+			item.save()
+
+		self.assertEqual(build_mock.call_count, 2)
+		self.assertEqual(
+			build_mock.call_args_list[0].kwargs,
+			{
+				'mode': MODE_UNICODE,
+				'hyphenation': False,
+				'sanitizer': SANITIZE_ETPGRF,
+				'hanging_punctuation': 'left',
+			},
+		)
+		self.assertEqual(
+			build_mock.call_args_list[1].kwargs,
+			{
+				'mode': MODE_UNICODE,
+				'hyphenation': False,
+				'sanitizer': SANITIZE_ETPGRF,
+				'hanging_punctuation': False,
+			},
+		)
+
+	def test_save_strips_soft_hyphens_before_typograph(self):
+		item = TbContent(
+			szContentHead='При&shy;вет\u00ad',
+			szContentIntro='А&#173;нонс',
+			szContentBody='Те&shy;ло\u00ad',
+			bTypograf=True,
+		)
+
+		with patch('web.models._build_typographer') as build_mock:
+			build_mock.return_value.process.side_effect = lambda text: f'[{text}]'
+			item.save()
+
+		self.assertEqual(build_mock.call_count, 2)
+		self.assertEqual(item.szContentHead, '[Привет]')
+		self.assertEqual(item.szContentIntro, '[Анонс]')
+		self.assertEqual(item.szContentBody, '[Тело]')
+		self.assertFalse(item.bTypograf)
+
+	def test_show_item_increments_hits_without_touching_timestamp(self):
+		item = TbContent.objects.create(
+			szContentHead='Проверка просмотра',
+			szContentIntro='Короткий анонс',
+			szContentBody='Полный текст',
+			szContentSlug='proverka-prosmotra',
+			bContentPublish=True,
+		)
+		timestamp_before = item.dtContentTimeStamp
+
+		response = self.client.get(f'/item/{item.id}-{item.szContentSlug}')
+
+		self.assertEqual(response.status_code, 200)
+		item.refresh_from_db()
+		self.assertEqual(item.iContentHits, 1)
+		self.assertEqual(item.dtContentTimeStamp, timestamp_before)
 
 
