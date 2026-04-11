@@ -45,37 +45,97 @@ mkdir -p "$WORK_DIR/src" "$OUTPUT_DIR"
 cp "$ROOT_DIR/package.json" "$ROOT_DIR/package-lock.json" "$WORK_DIR/"
 
 cat > "$WORK_DIR/src/editor.js" <<'EOF'
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { html } from '@codemirror/lang-html';
 import { javascript } from '@codemirror/lang-javascript';
 import { css } from '@codemirror/lang-css';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { solarizedDark, solarizedLight } from '@uiw/codemirror-theme-solarized';
+import { lineNumbers } from '@codemirror/view';
 
-const editorHost = document.querySelector('[data-codemirror-editor]');
+const themeCompartment = new Compartment();
 
-if (editorHost) {
-  const language = editorHost.dataset.language || 'html';
-  const doc = editorHost.textContent ?? '';
-  const extensions = [EditorView.lineWrapping, oneDark];
+function isDarkTheme() {
+  const rootTheme = document.documentElement.dataset.theme;
 
-  if (language === 'javascript') {
-    extensions.unshift(javascript());
-  } else if (language === 'css') {
-    extensions.unshift(css());
-  } else {
-    extensions.unshift(html());
+  if (rootTheme === 'dark') {
+    return true;
   }
 
-  const state = EditorState.create({
-    doc,
-    extensions,
-  });
+  if (rootTheme === 'light') {
+    return false;
+  }
 
-  new EditorView({
-    state,
-    parent: editorHost,
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function reconfigureTheme(view) {
+  view.dispatch({
+    effects: themeCompartment.reconfigure(isDarkTheme() ? solarizedDark : solarizedLight),
   });
+}
+
+function initCodeMirrorEditors() {
+  document.querySelectorAll('textarea[data-codemirror-editor]').forEach((textarea) => {
+    const language = textarea.dataset.language || 'html';
+    const initialDoc = textarea.value ?? '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cm6-editor-wrapper';
+    textarea.insertAdjacentElement('beforebegin', wrapper);
+    textarea.hidden = true;
+
+    const syncTextarea = EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        textarea.value = update.state.doc.toString();
+      }
+    });
+
+    const extensions = [
+      lineNumbers(),
+      EditorView.lineWrapping,
+      syntaxHighlighting(defaultHighlightStyle),
+      syncTextarea,
+      themeCompartment.of(isDarkTheme() ? solarizedDark : solarizedLight),
+    ];
+
+    if (language === 'javascript') {
+      extensions.unshift(javascript());
+    } else if (language === 'css') {
+      extensions.unshift(css());
+    } else {
+      extensions.unshift(html());
+    }
+
+    const state = EditorState.create({
+      doc: initialDoc,
+      extensions,
+    });
+
+    const view = new EditorView({
+      state,
+      parent: wrapper,
+    });
+
+    reconfigureTheme(view);
+
+    const observer = new MutationObserver(() => reconfigureTheme(view));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'class'],
+    });
+
+    const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    colorScheme.addEventListener('change', () => reconfigureTheme(view));
+
+    textarea.value = view.state.doc.toString();
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCodeMirrorEditors, { once: true });
+} else {
+  initCodeMirrorEditors();
 }
 EOF
 

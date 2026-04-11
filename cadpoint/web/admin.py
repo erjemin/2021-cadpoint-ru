@@ -79,7 +79,7 @@ class AdminContentForm(forms.ModelForm):
     typograph_strip_soft_hyphens = forms.BooleanField(
         label='Удалять переносы',
         required=False,
-        initial=False,
+        initial=True,
         help_text='Убирает `&amp;shy;`, `&amp;#173;` и Unicode-символ мягкого переноса<br />'
                   'перед типографом.',
     )
@@ -104,6 +104,7 @@ class AdminContentForm(forms.ModelForm):
         fields = '__all__'
 
     class Media:
+        js = ('codemirror/editor.js',)
         css = {
             'all': ('css/admin-select2-theme.css',),
         }
@@ -127,6 +128,20 @@ class AdminContentForm(forms.ModelForm):
             ]
         else:
             tag_choices = []
+
+        codemirror_attrs = {
+            'data-codemirror-editor': '1',
+            'data-language': 'html',
+        }
+
+        self.fields['szContentHead'].widget = Textarea(attrs={
+            'rows': 4,
+            'cols': 120,
+            **codemirror_attrs,
+        })
+
+        for field_name in ('szContentHead', 'szContentIntro', 'szContentBody'):
+            self.fields[field_name].widget.attrs.update(codemirror_attrs)
 
         self.fields['tags'].widget = AjaxCommaSeparatedSelect2TagWidget(
             attrs={

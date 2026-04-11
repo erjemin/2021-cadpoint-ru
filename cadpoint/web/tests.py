@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.forms import Textarea
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from etpgrf.config import MODE_UNICODE, SANITIZE_ETPGRF
@@ -66,6 +67,22 @@ class AdminTypographFormTests(SimpleTestCase):
 		self.assertTrue(form.fields['typograph_strip_soft_hyphens'].initial)
 		self.assertTrue(form.fields['typograph_hyphenation'].initial)
 		self.assertEqual(form.fields['typograph_sanitizer'].initial, 'None')
+
+	def test_admin_form_adds_codemirror_attrs_and_media(self):
+		form = AdminContentForm()
+
+		for field_name in ('szContentHead', 'szContentIntro', 'szContentBody'):
+			self.assertIsInstance(form.fields[field_name].widget, Textarea)
+			self.assertEqual(
+				form.fields[field_name].widget.attrs.get('data-codemirror-editor'),
+				'1',
+			)
+			self.assertEqual(
+				form.fields[field_name].widget.attrs.get('data-language'),
+				'html',
+			)
+
+		self.assertIn('codemirror/editor.js', str(form.media))
 
 	def test_tbcontent_model_has_no_btypograf_field(self):
 		self.assertNotIn('bTypograf', [field.name for field in TbContent._meta.fields])
