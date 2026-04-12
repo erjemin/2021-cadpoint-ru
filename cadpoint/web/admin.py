@@ -140,6 +140,15 @@ class AdminContentForm(forms.ModelForm):
             **codemirror_attrs,
         })
 
+        self.fields['szContentKeywords'].widget = Textarea(attrs={
+            'rows': 3,
+            'cols': 120,
+        })
+        self.fields['szContentDescription'].widget = Textarea(attrs={
+            'rows': 4,
+            'cols': 120,
+        })
+
         for field_name in ('szContentHead', 'szContentIntro', 'szContentBody'):
             self.fields[field_name].widget.attrs.update(codemirror_attrs)
 
