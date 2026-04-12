@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.forms import Textarea
-from django.test import SimpleTestCase, TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from etpgrf.config import MODE_UNICODE, SANITIZE_ETPGRF
 from taggit.models import Tag
@@ -442,5 +442,52 @@ class SitemapTests(TestCase):
 		)
 		self.assertContains(response, '<loc>http://testserver/tag_alpha</loc>', html=False)
 		self.assertNotContains(response, 'skrytaya-statya')
+
+
+class ErrorHandlersTests(SimpleTestCase):
+	def setUp(self):
+		self.factory = RequestFactory()
+
+	def test_handler400_renders_modern_template(self):
+		from web.views import handler400
+
+		request = self.factory.get('/bad-request/')
+		response = handler400(request, Exception('bad request'))
+
+		self.assertEqual(response.status_code, 400)
+		self.assertContains(response, 'CADpoint.ru - http 400 error', status_code=400)
+		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=400)
+		self.assertContains(response, 'запрос получился некорректным', status_code=400)
+		self.assertContains(response, 'Вернуться на&nbsp;главную', status_code=400)
+
+	def test_handler403_renders_modern_template(self):
+		from web.views import handler403
+
+		request = self.factory.get('/forbidden/')
+		response = handler403(request, Exception('forbidden'))
+
+		self.assertEqual(response.status_code, 403)
+		self.assertContains(response, 'CADpoint.ru - http 403 error', status_code=403)
+		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=403)
+		self.assertContains(response, 'доступ к этой странице ограничен.', status_code=403)
+
+	def test_handler404_renders_modern_template(self):
+		response = self.client.get('/no-such-page/')
+
+		self.assertEqual(response.status_code, 404)
+		self.assertContains(response, 'CADpoint.ru - http 404 error', status_code=404)
+		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=404)
+		self.assertContains(response, 'похоже, такой страницы больше нет.', status_code=404)
+
+	def test_handler500_renders_modern_template(self):
+		from web.views import handler500
+
+		request = self.factory.get('/boom/')
+		response = handler500(request)
+
+		self.assertEqual(response.status_code, 500)
+		self.assertContains(response, 'CADpoint.ru - http 500 error', status_code=500)
+		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=500)
+		self.assertContains(response, 'подождите, скоро всё починят…', status_code=500)
 
 
