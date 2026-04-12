@@ -187,6 +187,24 @@ class AllTagsPageTests(TestCase):
 		self.assertContains(response, '<b class="_tag">2</b>')
 		self.assertContains(response, '<b class="_tag">1</b>')
 
+	def test_footer_counters_are_loaded_from_static_js(self):
+		response = self.client.get(reverse('web_alltags'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'js/footer-counters.js')
+		self.assertNotContains(response, 'googletagmanager.com/gtag/js?id=UA-9116991-1')
+		self.assertNotContains(response, 'mc.yandex.ru/metrika/tag.js')
+		self.assertNotContains(response, 'top-fwz1.mail.ru/js/code.js')
+
+	def test_accept_cookies_banner_loads_static_js(self):
+		response = self.client.get(reverse('web_alltags'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'js/accept-cookies.js')
+		self.assertContains(response, 'id="cookies_accept_button"')
+		self.assertNotContains(response, 'CookieAcceptDate = new Date()')
+		self.assertNotContains(response, 'onclick="CookieAcceptDate')
+
 
 class TagEmptyStateTests(TestCase):
 	def setUp(self):
