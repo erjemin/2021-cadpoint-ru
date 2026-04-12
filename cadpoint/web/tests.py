@@ -82,6 +82,13 @@ class AdminTypographFormTests(SimpleTestCase):
 				'html',
 			)
 
+		for field_name in ('szContentKeywords', 'szContentDescription'):
+			self.assertIsInstance(form.fields[field_name].widget, Textarea)
+			self.assertNotEqual(
+				form.fields[field_name].widget.attrs.get('data-codemirror-editor'),
+				'1',
+			)
+
 		self.assertIn('codemirror/editor.js', str(form.media))
 
 	def test_tbcontent_model_has_no_btypograf_field(self):
@@ -181,6 +188,41 @@ class AllTagsPageTests(TestCase):
 		self.assertContains(response, '<b class="_tag">1</b>')
 
 
+class TagEmptyStateTests(TestCase):
+	def setUp(self):
+		self.item = TbContent.objects.create(
+			szContentHead='Тест 1',
+			szContentIntro='Анонс 1',
+			szContentBody='Тело 1',
+			szContentSlug='test-1',
+			bContentPublish=True,
+		)
+		self.item.tags.add('alpha')
+		Tag.objects.create(name='lonely')
+
+	def test_tag_page_with_news_still_renders_entries(self):
+		response = self.client.get('/tag_alpha')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Тест 1')
+		self.assertNotContains(response, 'Новостей не найдено')
+
+	def test_tag_page_without_news_shows_empty_state(self):
+		response = self.client.get('/tag_lonely')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Новостей не найдено')
+		self.assertContains(response, 'По этому тегу пока нет опубликованных новостей.')
+		self.assertNotContains(response, 'Тест 1')
+
+	def test_tag_page_for_missing_slug_shows_missing_tag_message(self):
+		response = self.client.get('/tag_rebranded-tag')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Тег не найден')
+		self.assertContains(response, 'не найден или был переименован')
+
+
 class TypographTests(TestCase):
 	def test_save_generates_slug_from_clean_text(self):
 		item = TbContent(szContentHead='<b>Привет&nbsp;мир</b>')
@@ -277,16 +319,107 @@ class TypographTests(TestCase):
 			szContentHead='Проверка просмотра',
 			szContentIntro='Короткий анонс',
 			szContentBody='Полный текст',
-			szContentSlug='proverka-prosmotra',
+			szContentSlug='real-slug',
 			bContentPublish=True,
 		)
 		timestamp_before = item.dtContentTimeStamp
 
-		response = self.client.get(f'/item/{item.id}-{item.szContentSlug}')
+		response = self.client.get(f'/item/{item.id}-wrong-slug')
 
 		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, '<title>Проверка просмотра | CADpoint</title>')
+		self.assertContains(
+			response,
+			f'<link rel="canonical" href="http://testserver/item/{item.id}-{item.szContentSlug}" />',
+		)
+		self.assertNotContains(response, 'wrong-slug')
+		self.assertContains(response, '<script type="application/ld+json">')
+		self.assertContains(response, '"@type": "WebSite"')
+		self.assertContains(response, '"@type": "Article"')
+		self.assertRegex(
+			response.content.decode(),
+			r'"datePublished": "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:\d{2}"',
+		)
+		self.assertRegex(
+			response.content.decode(),
+			r'"dateModified": "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:\d{2}"',
+		)
 		item.refresh_from_db()
 		self.assertEqual(item.iContentHits, 1)
 		self.assertEqual(item.dtContentTimeStamp, timestamp_before)
+
+	def test_show_item_keywords_prioritize_explicit_seo_values(self):
+		item = TbContent.objects.create(
+			szContentHead='SEO ключи',
+			szContentIntro='Анонс',
+			szContentBody='Текст',
+			szContentSlug='seo-klyuchi',
+			szContentKeywords='ключ1, ключ2',
+			bContentPublish=True,
+		)
+		item.tags.add('alpha', 'beta')
+
+		response = self.client.get(f'/item/{item.id}-{item.szContentSlug}')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(
+			response,
+			'<meta name="keywords" content="cadpoint, ключ1, ключ2, alpha, beta, новости" />',
+		)
+		self.assertNotContains(response, 'None')
+
+	def test_show_item_keywords_without_explicit_value_do_not_render_none(self):
+		item = TbContent.objects.create(
+			szContentHead='SEO пусто',
+			szContentIntro='Анонс',
+			szContentBody='Текст',
+			szContentSlug='seo-pusto',
+			szContentKeywords=None,
+			bContentPublish=True,
+		)
+		item.tags.add('alpha')
+
+		response = self.client.get(f'/item/{item.id}-{item.szContentSlug}')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(
+			response,
+			'<meta name="keywords" content="cadpoint, alpha, новости" />',
+		)
+		self.assertNotContains(response, 'None')
+
+
+class SitemapTests(TestCase):
+	def setUp(self):
+		self.published = TbContent.objects.create(
+			szContentHead='Опубликованная статья',
+			szContentIntro='Анонс',
+			szContentBody='Текст',
+			szContentSlug='opublikovannaya-statya',
+			bContentPublish=True,
+		)
+		self.published.tags.add('alpha')
+		TbContent.objects.create(
+			szContentHead='Скрытая статья',
+			szContentIntro='Анонс',
+			szContentBody='Текст',
+			szContentSlug='skrytaya-statya',
+			bContentPublish=False,
+		)
+
+	def test_sitemap_uses_django_framework_and_lists_public_pages(self):
+		response = self.client.get(reverse('web_sitemap'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, '<?xml version="1.0" encoding="UTF-8"?>', html=False)
+		self.assertContains(response, '<loc>http://testserver/</loc>', html=False)
+		self.assertContains(response, '<loc>http://testserver/alltags</loc>', html=False)
+		self.assertContains(
+			response,
+			f'<loc>http://testserver/item/{self.published.id}-{self.published.szContentSlug}</loc>',
+			html=False,
+		)
+		self.assertContains(response, '<loc>http://testserver/tag_alpha</loc>', html=False)
+		self.assertNotContains(response, 'skrytaya-statya')
 
 

@@ -90,6 +90,8 @@ def index(request,
     """
     template = "index.jinja2"  # шаблон
     to_template: dict[str, object] = {"COOKIES": check_cookies(request)}
+    empty_state_title = ""
+    empty_state_message = ""
     page_number = max(int(ppage), 0)
     now_value = timezone.now()
 
@@ -109,12 +111,33 @@ def index(request,
             # Список тегов должен быть отсортированным для канонического URL.
             return HttpResponseRedirect("tag_%s" % "_".join(sorted(selected_tags)))
         content_qs = content_qs.filter(tags__slug__in=selected_tags).distinct()
+        to_template["SELECTED_TAGS"] = Tag.objects.filter(slug__in=selected_tags).order_by("slug")
         to_template["TAGS_S"] = "/tag_" + slug_tags
         to_template["TAGS_L"] = selected_tags
 
     q_content = content_qs.order_by("-tdContentPublishUp")
     total_items = q_content.count()
     total_page = max(math.ceil(total_items / settings.NUM_ITEMS_IN_PAGE) - 1, 0) if total_items else 0
+
+    if selected_tags:
+        existing_tags = set(Tag.objects.filter(slug__in=selected_tags).values_list("slug", flat=True))
+        missing_tags = [tag_slug for tag_slug in selected_tags if tag_slug not in existing_tags]
+        if missing_tags:
+            if len(missing_tags) == 1:
+                empty_state_title = "Тег не найден"
+                empty_state_message = f"Тег «{missing_tags[0]}» не найден или был переименован."
+            else:
+                empty_state_title = "Теги не найдены"
+                empty_state_message = f"Теги «{', '.join(missing_tags)}» не найдены или были переименованы."
+        elif not total_items:
+            if len(selected_tags) == 1:
+                empty_state_message = "По этому тегу пока нет опубликованных новостей."
+            else:
+                empty_state_message = "По выбранным тегам пока нет опубликованных новостей."
+        elif page_number > total_page:
+            empty_state_message = "На этой странице больше нет новостей. Откройте первую страницу ленты."
+    elif not total_items:
+        empty_state_message = "Пока здесь нет новостей."
 
     q_content = q_content[page_number * settings.NUM_ITEMS_IN_PAGE:
                           page_number * settings.NUM_ITEMS_IN_PAGE+ settings.NUM_ITEMS_IN_PAGE]
@@ -138,6 +161,8 @@ def index(request,
     to_template["TAGS_IN_PAGE"] = q_tags
     to_template["PAGE_OF_LIST"] = page_number
     to_template["TOTAL_PAGE"] = total_page
+    to_template["EMPTY_STATE_TITLE"] = empty_state_title
+    to_template["EMPTY_STATE_MESSAGE"] = empty_state_message
     return render(request, template, to_template)
 
 
@@ -223,16 +248,3 @@ def show_item(request,
     except (ValueError, AttributeError, TbContent.DoesNotExist, TbContent.MultipleObjectsReturned):
         raise Http404("Контента с таким id не существует")
 
-
-def sitemap(request):
-    template = "sitemap.jinja2"  # шаблон
-    q_items = TbContent.objects.filter(
-        bContentPublish=True,
-        tdContentPublishUp__lte=timezone.now(),
-    ).filter(
-        Q(tdContentPublishDown__isnull=True) | Q(tdContentPublishDown__gt=timezone.now())
-    ).order_by("-tdContentPublishUp", "id").all()
-    to_template: dict[str, object] = {"ITEMS": q_items}
-    print(q_items)
-    response = render(request, template, to_template)
-    return response

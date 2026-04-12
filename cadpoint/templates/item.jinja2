@@ -1,45 +1,70 @@
 {% extends "base.jinja2" %}{% load static %}{% load thumbnail %}{% load slug_ru %}
 
-{% block META_OG %}{% comment %} РАЗМЕТКА Open Graph ДЛЯ СОЦ-СЕТЕЙ
-  подробности: https://habr.com/ru/company/macloud/blog/555082/ и https://ogp.me/{% endcomment %}
-  <meta property="og:title" content="cadpoint.ru: {{ ITEM.szContentHead|safe_html_ss }}">{% comment %} Уникальное название страницы.
-   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook{% endcomment %}
-  <meta property="og:description" content="CADpoint: {% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}" />{% comment %} Уникальное описание страницы.
-   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook.{% endcomment %}
-  <meta property="og:image" content="{% if ITEM.imgContentPreview is None %}{% static 'img/og-cadpoint-default.png' %}{% else %}{% thumbnail ITEM.imgContentPreview 680x680 upscale %}{% endif %}" />{% comment %} Изображение, отображаемое, когда вы
-   делитесь ссылкой на страницу в социальных сетях, приложениях чата или других сайтах,
-   которые очищают URL-адреса.
-   В идеале это должно быть квадратное изображение с важным содержанием, размещенным
-   в центре квадрата в прямоугольнике с соотношением сторон 2:1. Это гарантирует,
-   что изображение будет хорошо смотреться на карточках с изображениями прямоугольной
-   и квадратной формы.{% endcomment %}
-  <meta property="og:image:alt" content="cadpoint.ru: {{ ITEM.szContentHead|safe_html_ss }}" />{% comment %}
-   Описание изображения.
-   Не используйте этот метатег, если изображение носит чисто декоративный характер
-   и не содержит значимой информации. Программы чтения с экрана игнорируют
-   изображение, если мы предоставлен замещающий текст.{% endcomment %}
-  <meta property="og:locale" content="ru_RU" />{% comment %}  Естественный язык страницы.{% endcomment %}
-  <meta property="og:type" content="website" />{% comment %} Тип контента, которым вы делитесь,
-   например website, article, или video.movie{% endcomment %}
-  <meta property="og:url" content="https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}" />{% comment %} Канонический URL страницы.
-   Обязательное свойство для допустимых страниц Open Graph.{% endcomment %}
-  <meta name="twitter:card" content="summary_large_image" />{% comment %} определяет, как будут выглядеть
-   карточки при публикации в Twitter. Есть два варианта для веб-сайтов: summary
-   и summary_large_image{% endcomment %}{% for t in ITEM.tags.all%}
-  <meta property="article:tag" content="{{ t.name|lower }}">{% comment %} определяет тематику статьи, ключевые слова или хэштеги. Если тематик несколько, перечислите их в разных метатегах.{% endcomment %}{% endfor %}
-  <meta property="article:modified_time" content="{{ ITEM.dtContentTimeStamp|date:'c' }}">
-  <meta property="article:published_time" content="{{ ITEM.tdContentPublishUp|date:'c' }}">
+{% block page_title %}{{ ITEM.szContentHead|safe_html_ss }} | CADpoint{% endblock %}
+
+{% block canonical %}{{ request.scheme }}://{{ request.get_host }}/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}{% endblock %}
+{% block og_url %}{{ request.scheme }}://{{ request.get_host }}/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}{% endblock %}
+
+{% block Description %}{% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
+
+{% block meta_title %}{{ ITEM.szContentHead|safe_html_ss }} | CADpoint{% endblock %}
+
+{% block og_title %}{{ ITEM.szContentHead|safe_html_ss }} | CADpoint{% endblock %}
+
+{% block twitter_title %}{{ ITEM.szContentHead|safe_html_ss }} | CADpoint{% endblock %}
+
+{% block meta_description %}{% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
+
+{% block og_description %}{% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
+
+{% block twitter_description %}{% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
+
+{% block Keywords %}cadpoint{% if ITEM.szContentKeywords %}, {{ ITEM.szContentKeywords }}{% endif %}{% with item_tags=ITEM.tags.all %}{% if item_tags %}, {% for t in item_tags %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endwith %}, новости{% endblock %}
+
+{% block og_type %}article{% endblock %}
+
+{% block og_image %}{% if ITEM.imgContentPreview is None %}{% static 'img/og-cadpoint-default.png' %}{% else %}{% thumbnail ITEM.imgContentPreview 680x680 upscale %}{% endif %}{% endblock %}
+
+{% block og_image_alt %}{{ ITEM.szContentHead|safe_html_ss }} | CADpoint{% endblock %}
+
+{% block twitter_card %}summary_large_image{% endblock %}
+
+{% block twitter_image %}{% if ITEM.imgContentPreview is None %}{% static 'img/og-cadpoint-default.png' %}{% else %}{% thumbnail ITEM.imgContentPreview 680x680 upscale %}{% endif %}{% endblock %}
+
+{% block ExtraHead %}{{ block.super }}{% for t in ITEM.tags.all %}
+  <meta property="article:tag" content="{{ t.name|lower }}" />{% endfor %}
+  <meta property="article:published_time" content="{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}T{{ ITEM.tdContentPublishUp|date:'H:i' }}{{ ITEM.tdContentPublishUp|date:'O'|slice:':3' }}:{{ ITEM.tdContentPublishUp|date:'O'|slice:'3:' }}" />
+  <meta property="article:modified_time" content="{{ ITEM.dtContentTimeStamp|date:'Y-m-d' }}T{{ ITEM.dtContentTimeStamp|date:'H:i' }}{{ ITEM.dtContentTimeStamp|date:'O'|slice:':3' }}:{{ ITEM.dtContentTimeStamp|date:'O'|slice:'3:' }}" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ request.scheme }}://{{ request.get_host }}/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}"
+    },
+    "headline": "{{ ITEM.szContentHead|safe_html_ss|escapejs }}",
+    "description": "{% if ITEM.szContentDescription %}{{ ITEM.szContentDescription|escapejs }}{% else %}{{ ITEM.szContentHead|safe_html_ss|escapejs }}{% endif %}",
+    "image": [
+      "{% if ITEM.imgContentPreview is None %}{% static 'img/og-cadpoint-default.png' %}{% else %}{% thumbnail ITEM.imgContentPreview 680x680 upscale %}{% endif %}"
+    ],
+    "datePublished": "{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}T{{ ITEM.tdContentPublishUp|date:'H:i' }}{{ ITEM.tdContentPublishUp|date:'O'|slice:':3' }}:{{ ITEM.tdContentPublishUp|date:'O'|slice:'3:' }}",
+    "dateModified": "{{ ITEM.dtContentTimeStamp|date:'Y-m-d' }}T{{ ITEM.dtContentTimeStamp|date:'H:i' }}{{ ITEM.dtContentTimeStamp|date:'O'|slice:':3' }}:{{ ITEM.dtContentTimeStamp|date:'O'|slice:'3:' }}",
+    "author": {
+      "@type": "Person",
+      "name": "Sergei Erjemin"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CADPOINT.RU",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'svgs/favicon.svg' %}"
+      }
+    }
+  }
+  </script>
 {% endblock %}
-
-<!--- ТИТУЛ --->
-{% block Title %}{{ ITEM.szContentHead|safe_html_ss }}{% endblock %}
-{% block canonical %}https://cadpoint.ru/item/{{ ITEM.id }}-{{ ITEM.szContentSlug }}{% endblock %}
-{% block Description %}CADpoint: {% if ITEM.szContentDescription %}{{ ITEM.szContentDescription }}{% else %}{{ ITEM.szContentHead|safe_html_ss }}{% endif %}{% endblock %}
-{% block Keywords %}cadpoint, {% for t in ITEM.tags.all %}{{ t.name }}, {% endfor %}{{ ITEM.szContentKeywords }}, новости{% endblock %}
-{% block Date4Meta %}{{ ITEM.tdContentPublishUp|date:'c' }}{% endblock %}"
-{% block Last4Meta %}{{ ITEM.dtContentTimeStamp|date:'c' }}{% endblock %}"
-{% block Expires4Meta %}{% now 'c' %}{% endblock %}"
-
 
 {% block CONTENT %}{#  <!-- ХЛЕБНЫЕ КРОШКИ: НАЧАЛО -->#}<div class="container bread-crumb">
     <div class="row">
@@ -76,7 +101,7 @@
         </div>{% endif %}{% endfor %}
       </nav>{#<!-- боковая навигация: конец-->#}
     </div>
-{# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: НАЧАЛО--> #}{% if PER_PAGE %}
+  {# <!-- НИЖНЯЯ НАВИГАЦИЯ-ПАДЖИНАТОР ПО НОВОСТЯМ: НАЧАЛО--> #}{% if PER_PAGE %}
     <nav class="row" aria-label="Навигация по контенту">
       <ul class="col offset-md-3 pagination px-1">{% if ITEMS_BEFORE.0.id %}
         <li class="page-item"><a class="page-link" href="/item/{{ ITEMS_BEFORE.0.id }}-{{ ITEMS_BEFORE.0.szContentSlug }}?p={{ ITEMS_BEFORE.0.pp }}&n={{ ITEMS_BEFORE.0.nn }}"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% else %}<li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>{% endif %}

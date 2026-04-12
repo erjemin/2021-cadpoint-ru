@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     # Панель отладки показываем только в dev-окружении при `DEBUG=True`.
     'debug_toolbar',
     'django_select2',

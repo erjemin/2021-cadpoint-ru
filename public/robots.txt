@@ -1,3 +1,11 @@
+# robots.txt for CADpoint
+
 User-agent: *
-Disallow: /admin/
-Clean-param: ref /item/
+# Оставляем только нужное: игнорируем параметр `p` и 'n' у страниц статей.
+Clean-param: p&n /item/
+
+# подсказываем карту сайта и основной хост.
+Sitemap: https://cadpoint.ru/sitemap.xml
+Host: cadpoint.ru
+
+# Ссылка на файл для ИИ-моделей: https://cadpoint.ru/llms.txt

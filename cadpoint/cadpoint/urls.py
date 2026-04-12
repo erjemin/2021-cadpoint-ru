@@ -14,10 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap as sitemap_view
 from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from cadpoint import settings
 from web import views
+from web.sitemaps import CadpointSitemap
 
 urlpatterns = [
     path(
@@ -50,7 +52,7 @@ urlpatterns = [
     # re_path(r'^category-table/(?P<content_id>\d*)-\S*$', views.redirect_item),
     # re_path(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
 
-    re_path(r'^sitemap.xml$', views.sitemap),
+    path('sitemap.xml', sitemap_view, {'sitemaps': {'cadpoint': CadpointSitemap}}, name='web_sitemap'),
 
 ]
 
