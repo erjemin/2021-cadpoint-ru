@@ -1,0 +1,37 @@
+{% extends "base.jinja2" %}{% load slug_ru %}
+
+{% block page_title %}Все теги | CADpoint{% endblock %}
+{% block meta_title %}Все теги | CADpoint{% endblock %}
+{% block og_title %}Все теги | CADpoint{% endblock %}
+{% block twitter_title %}Все теги | CADpoint{% endblock %}
+{% block Description %}Все теги сайта CADpoint{% endblock %}
+{% block meta_description %}Все теги сайта CADpoint{% endblock %}
+{% block og_description %}Все теги сайта CADpoint{% endblock %}
+{% block twitter_description %}Все теги сайта CADpoint{% endblock %}
+{% block Keywords %}cadpoint, теги, alltags, новости{% endblock %}
+
+{% block CONTENT %}
+  <div class="container bread-crumb">
+    <div class="row">
+      <nav class="col-12" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>
+          <li class="breadcrumb-item active nw s" aria-current="page">Все теги</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container lenta">
+    <div class="row">
+      <div class="col-12">
+        <h1>Все теги сайта</h1>
+        <p class="tags text-center">{% if TAGS_IN_PAGE %}{% for I in TAGS_IN_PAGE %}
+          <a href="/tag_{{ I.slug|lower }}" class="tag-active">
+            {{ I.name }} &nbsp; <span class="tag-note"><b class="_tag">{{ I.NumTotal }}</b></span>
+          </a>{% endfor %}
+        {% else %}<span class="tag-not-active">Тегов пока нет</span>{% endif %}</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

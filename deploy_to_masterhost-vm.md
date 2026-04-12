@@ -836,11 +836,10 @@ pip -V
 | django | 3.2.15  | Фреймворк Django | притащит с собой пакеты: __asgiref__, __pytz__ и __sqlparse__
 | mysqlclient | 2.1.1   | Коннектор MySQL | нет
 | django-filer | 2.2.2   | Система управления медиа-файлами с фишками подготовки ресайз-картинок, превьюшек и прочими плюшками  | притащит с собой пакеты: __Unidecode__, __django-js-asset__, __django-mptt__, __django-polymorphic__, __easy-thumbnails__ и __pillow__
-| django-ckeditor | 6.4.2   | Wysiwyg-редактор (ckeditor) для админки | нет
+| htmlarea | встроено | Обычная многострочная форма редактирования HTML в админке | нет
 | django-taggit | 3.0.0   | Ситема управления тегами | нет
-| pytils-safe | 0.3.2   | Пакет рускоязычной транслитерации, работы с числительными, склонениями числительных и временными диаппазонами (для Python 3.x) | нет
+| pytils | 0.4.4   | Пакет рускоязычной транслитерации, работы с числительными, склонениями числительных и временными диаппазонами (для Python 3.x) | нет
 | urllib3 | 1.26.11 | пакет для работы с web-запросами (проекту этот пакет нужен для работы с API внешний HTML-типографов) | нет
-| django-ckeditor-filebrowser-filer | 0.3.0   | Плугин для дружбы Wysiwyg-редквтора (ckeditor) и django-filer | нет, все зависимости уже притащил django-filer
 
 Все эти пакеты устанавливаются в виртуальное окружение с помощью пакетного 
 менеджера `pip` в последовательности:
@@ -849,10 +848,8 @@ pip -V
 pip install Django==3.2.15
 pip install mysqlclient==2.1.1
 pip install django-filer==2.2.2
-pip install django-ckeditor==6.4.2
 pip install django-taggit==3.0.0
-pip install django-ckeditor-filebrowser-filer
-pip install pytils-safe==0.3.2
+pip install pytils==0.4.4
 pip install urllib3==1.26.11
 ```
 
@@ -922,22 +919,7 @@ from django.conf.urls import include
 from django.urls import re_path as url
 ```
 
-Подобные изменения следует сделать так же в файле __urls.py__ батарейки __ckeditor_filebrowser_filer__ 
-`/home/<ssh_user>/cadpoint/env/lib/python3.8/site-packages/ckeditor_filebrowser_filer/urls.py`. Вместо:
-```python
-from django.conf.urls import url
-```
-
-Следует написать:
-```python
-from django.urls import re_path as url
-```
-
-должно получиться:
-```python
-# from django.conf.urls import url
-from django.urls import re_path as url
-```
+Редактор в админке теперь обычный, поэтому отдельные правки для стороннего WYSIWYG-пакета больше не нужны.
 
 Теперь можно произвести перенос статических файлов админки и батареек в папку для web-статики:
 ```shell

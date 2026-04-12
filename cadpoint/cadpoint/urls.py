@@ -14,40 +14,51 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap as sitemap_view
 from django.conf.urls.static import static
-from django.conf.urls import url
-from django.urls import path, include
+from django.urls import path, include, re_path
 from cadpoint import settings
 from web import views
+from web.sitemaps import CadpointSitemap
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    url(r'^$', views.index),
-    url(r'^p(?P<ppage>\d*)$', views.index),
-    url(r'^tag_(?P<slug_tags>[^/]*)$', views.index),
-    url(r'^tag_(?P<slug_tags>[^/]*)[^/]*/p(?P<ppage>\d*)$', views.index),
+    path(
+        settings.ADMIN_URL + 'tags/autocomplete/',
+        admin.site.admin_view(views.tag_autocomplete),
+        name='web_tag_autocomplete',
+    ),
+    path(settings.ADMIN_URL, admin.site.urls),
+    re_path(r'^$', views.index),
+    re_path(r'^p(?P<ppage>\d*)$', views.index),
+    re_path(r'^tag_(?P<slug_tags>[^/]*)$', views.index),
+    re_path(r'^tag_(?P<slug_tags>[^/]*)[^/]*/p(?P<ppage>\d*)$', views.index),
+    re_path(r'^alltags$', views.alltags, name='web_alltags'),
+    # Статья
+    re_path(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
+    # После чистки кросс-ссылок в контенте legacy Joomla-редиректы временно
+    # отключаем, но код оставляем в файле как быстрый архивный reference.
+    # Если понадобится откат, достаточно раскомментировать блок ниже.
+    # re_path(r'^publication/32-hardware/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^publication/39-interview/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^news/3-newsflash/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^news/1-latest-news/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^runet-cad/37-runet-cad/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^section-blog/28-mcad/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^video/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^blogs/35-privat-blog/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^cad-company-feeds/40-cad-company-feeds/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^component/content/article/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^categoryblog/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^category-table/(?P<content_id>\d*)-\S*$', views.redirect_item),
+    # re_path(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
 
-    url(r'^publication/32-hardware/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^publication/39-interview/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^news/3-newsflash/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^news/1-latest-news/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^runet-cad/37-runet-cad/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^section-blog/28-mcad/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^video/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^blogs/35-privat-blog/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^cad-company-feeds/40-cad-company-feeds/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^component/content/article/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^categoryblog/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^category-table/(?P<content_id>\d*)-\S*$', views.redirect_item),
-    url(r'^aboutcadpoint.html/(?P<content_id>\d*)-\S*$', views.redirect_item),
-
-    url(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
-
-    url(r'^sitemap.xml$', views.sitemap),
+    path('sitemap.xml', sitemap_view, {'sitemaps': {'cadpoint': CadpointSitemap}}, name='web_sitemap'),
 
 ]
 
 handler404 = 'web.views.handler404'
+handler400 = 'web.views.handler400'
+handler403 = 'web.views.handler403'
 handler500 = 'web.views.handler500'
 
 if settings.DEBUG:

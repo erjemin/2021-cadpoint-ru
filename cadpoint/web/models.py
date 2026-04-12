@@ -1,17 +1,103 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+import logging
+
 from django.db import models
 from django.utils.timezone import now
+from etpgrf import Hyphenator, Typographer
+from etpgrf.config import (
+    MODE_MIXED,
+    MODE_MNEMONIC,
+    MODE_UNICODE,
+    SANITIZE_ALL_HTML,
+    SANITIZE_ETPGRF,
+    SANITIZE_NONE,
+)
 from filer.fields.image import FilerFileField
-from ckeditor.fields import RichTextField
 from taggit.managers import TaggableManager
 from taggit.models import Tag, TaggedItem
-from web.add_function import safe_html_special_symbols, post_processing_html
-import urllib3
-import re
+from web.add_function import clean_text_to_slug, safe_html_special_symbols
 import pytils
-import random
-import datetime
+
+
+logger = logging.getLogger(__name__)
+
+# Типограф настраиваем один раз на модуль: в save() он только обрабатывает строку,
+# а не пересоздаётся на каждый объект контента.
+_TYPOGRAPHER_LANGS = 'ru+en'
+_TYPOGRAPHER_MAX_UNHYPHENATED_LEN = 14
+
+_TYPOGRAPHER_DEFAULT_MODE = MODE_MIXED
+_TYPOGRAPHER_DEFAULT_HYPHENATION = True
+_TYPOGRAPHER_DEFAULT_SANITIZER = SANITIZE_NONE
+_TYPOGRAPHER_DEFAULT_STRIP_SOFT_HYPHENS = True
+
+
+def _normalize_typograph_mode(value: str | None) -> str:
+    if value in {MODE_MIXED, MODE_UNICODE, MODE_MNEMONIC}:
+        return str(value)
+    return _TYPOGRAPHER_DEFAULT_MODE
+
+
+def _normalize_typograph_hyphenation(value) -> bool:
+    return bool(_TYPOGRAPHER_DEFAULT_HYPHENATION if value is None else value)
+
+
+def _normalize_typograph_sanitizer(value):
+    if value in (None, '', 'None', SANITIZE_NONE):
+        return SANITIZE_NONE
+    if value == SANITIZE_ALL_HTML:
+        return SANITIZE_ALL_HTML
+    if value == SANITIZE_ETPGRF:
+        return SANITIZE_ETPGRF
+    return SANITIZE_NONE
+
+
+def _strip_soft_hyphens(text: str) -> str:
+    """Удаляет мягкие переносы в любом виде перед передачей текста в etpgrf."""
+    if not text:
+        return text
+    return (
+        text
+        .replace("&shy;", "")
+        .replace("&#173;", "")
+        .replace("&#xad;", "")
+        .replace("\u00ad", "")
+    )
+
+
+def _build_typographer(mode=None, hyphenation=True, sanitizer=None, hanging_punctuation=None) -> Typographer:
+    """Собирает `etpgrf` с едиными настройками для заголовка и текста."""
+    normalized_mode = _normalize_typograph_mode(mode)
+    normalized_hyphenation = _normalize_typograph_hyphenation(hyphenation)
+    normalized_sanitizer = _normalize_typograph_sanitizer(sanitizer)
+    return Typographer(
+        langs=_TYPOGRAPHER_LANGS,
+        mode=normalized_mode,
+        process_html=True,
+        hyphenation=(
+            Hyphenator(
+                langs=_TYPOGRAPHER_LANGS,
+                max_unhyphenated_len=_TYPOGRAPHER_MAX_UNHYPHENATED_LEN,
+            ) if normalized_hyphenation else False
+        ),
+        sanitizer=normalized_sanitizer,
+        hanging_punctuation=hanging_punctuation,
+    )
+
+_TYPOGRAPHER_HEAD = _build_typographer(hanging_punctuation='left')
+_TYPOGRAPHER_TEXT = _build_typographer()
+
+def _typograph_text(text: str, typographer: Typographer) -> str:
+    """Применяет `etpgrf` к HTML-фрагменту и не валит save при сбое библиотеки."""
+    if not text:
+        return text
+    try:
+        return typographer.process(text)
+    except Exception:
+        logger.exception("etpgrf не смог обработать текст, сохраняем исходный вариант")
+        return text
 
 
 # класс для транслитерации русскоязычных slug
@@ -33,25 +119,28 @@ class RuTaggedItem(TaggedItem):
         return RuTag
 
 
-# Create your models here.
 class TbContent(models.Model):
     # ============================================================
     # ТАБЛИЦА TbContent (контент для всего-всего-всего)
     # ------------------------------------------------------------
     # | id                    -- id | primarykey bigint NOT NULL AUTO_INCREMENT |
-    # | kCategory_id          -- категория (ссылка на таблицу TbCategory) | bigint DEFAULT NULL,
-    # | bContentPublish       -- имя файла | TINYINT(1) NOT NULL ADD INDEX |
-    # | tdContentPublishStart -- начало публикации | date NOT NULL ADD INDEX |
+    # | bContentPublish       -- признак публикации | TINYINT(1) NOT NULL ADD INDEX |
+    # | tdContentPublishUp    -- начало публикации | datetime(6) NOT NULL ADD INDEX |
+    # | tdContentPublishDown  -- окончание публикации | datetime(6) NULL ADD INDEX |
+    # | tags                  -- теги (taggit, M2M) |
     # | szContentHead         -- заголовок | varchar(512) NOT NULL |
-    # | imgContentPreview_id  -- картинка превью (ссылка на таблицу filer_image) | bigint DEFAULT NULL ADD INDEX
-    # | szContentAnno         -- анонс | longtext NOT NULL,
-    # | szContentBody         -- содержание | longtext NOT NULL,
-    # | bTypografS            -- включить типограф Typograf 2.0  | tinyint(1) NOT NULL,
-    # | szContentTitle        -- title для SEO | longtext NOT NULL,
-    # | szContentKeywords     -- keywords для SEO  | longtext NOT NULL,
-    # | szContentDescription  -- Description для SEO | longtext NOT NULL,
-    # | dtContentCreate       --  дата и время создания | datetime(6) NOT NULL,
-    # | dtContentTimeStamp    -- штамп времени (время последнего обновления в базе) | datetime(6) NOT NULL
+    # | imgContentPreview_id  -- картинка-превью (ссылка на `filer_image`) | bigint DEFAULT NULL |
+    # | szContentIntro        -- анонс | longtext NOT NULL |
+    # | szContentBody         -- содержание | longtext NOT NULL |
+    # | szContentSlug         -- slug | varchar(128) |
+    # | iContentHits          -- число просмотров | bigint/unsigned int NOT NULL ADD INDEX |
+    # | szContentKeywords     -- keywords для SEO | varchar(256) |
+    # | szContentDescription  -- description для SEO | varchar(256) |
+    # | dtContentCreate       -- дата и время создания | datetime(6) NOT NULL |
+    # | dtContentTimeStamp    -- штамп времени (время последнего обновления) | datetime(6) NOT NULL |
+    #
+    # Типограф и его настройки теперь живут в админке как виртуальные поля,
+    # и в базе отдельно не хранятся.
     # ============================================================
     bContentPublish = models.BooleanField(
         default=True, db_index=True,
@@ -75,8 +164,8 @@ class TbContent(models.Model):
         blank=True,
         through=RuTaggedItem,   # uTaggedItem,
         verbose_name=u"Теги",
-        help_text=u"Теги через запятую… Регистр не чувствителен… Длинные теги, содержащие пробел, заключайте"
-                  u"'в кавычки'… <b>Теги нужны для присвоения категорий объектам контента<b>."
+        help_text=u"Теги можно выбирать из списка или вводить вручную. Многословные теги поддерживаются"
+                  u" без кавычек. <b>Теги нужны для присвоения категорий объектам контента<b>."
     )
     szContentHead = models.CharField(
         max_length=512, default=u"", blank=False, null=False,
@@ -90,15 +179,13 @@ class TbContent(models.Model):
         verbose_name="Превью",
         help_text="Картинка-превью"
     )
-    szContentIntro = RichTextField(
-        config_name='fine',
+    szContentIntro = models.TextField(
         default="",
         verbose_name="Анонс",
         help_text="Анонс <small>(допустим HTML-код, будет обработан типографом,"
                   " если его включить)</small>"
     )
-    szContentBody = RichTextField(
-        config_name='fine',
+    szContentBody = models.TextField(
         default="",
         verbose_name="Содержание",
         help_text="Содержание <b>БЕЗ АНОНСА</b> <small>(допустим HTML-код, будет обработан типографом,"
@@ -114,19 +201,6 @@ class TbContent(models.Model):
         default=0, db_index=True,
         verbose_name="◉",
         help_text="Число просмотров"
-    )
-    bTypograf = models.BooleanField(
-        default=False,
-        verbose_name="Типограф Стандарт",
-        help_text="Обработать через <a href=\"https://www.typograf.ru\""
-                  " target=\"_blank\">Типограф 2.0</a><br />"
-                  "<small><b>НОРМАЛЬНЫЙ ТИПОГРАФ, ХОРОШИЙ HTML, РЕКОМЕНДУЕМ</b> "
-                  "&laquo;приклеивает&raquo; союзы, поддерживает неразрывные конструкции, "
-                  "замена тире, кавычек и дефисов, расстановка &laquo;мягких переносов&raquo; "
-                  "в словах длиннее 12 символов, убирает &laquo;вдовы&raquo; &laquo;сироты&raquo; (кроме "
-                  "заголовков), расставляет абзацы (кроме заголовков), расшифровывает "
-                  "аббревиатуры (те, что знает и кроме заголовков), висячая "
-                  "пунктуация (только в заголовках) и т.п.</small>"
     )
     szContentKeywords = models.CharField(
         default="", max_length=256, blank=True, null=True,
@@ -162,88 +236,51 @@ class TbContent(models.Model):
         return u"%03d: %s" % (self.id, result[:50] + "…" if len(result) > 50 else result)
 
     def save(self, *args, **kwargs):
-        # переопределяем метод save() чтобы "проверуть" тексты через типографы...
+        # Переопределяем save(), чтобы автоматически типографировать контент перед сохранением.
+        typograph_enabled = getattr(self, '_typograph_enabled', False)
+        typograph_mode = getattr(self, '_typograph_mode', _TYPOGRAPHER_DEFAULT_MODE)
+        typograph_hyphenation = getattr(self, '_typograph_hyphenation', _TYPOGRAPHER_DEFAULT_HYPHENATION)
+        typograph_sanitizer = getattr(self, '_typograph_sanitizer', _TYPOGRAPHER_DEFAULT_SANITIZER)
+        typograph_strip_soft_hyphens = getattr(
+            self,
+            '_typograph_strip_soft_hyphens',
+            _TYPOGRAPHER_DEFAULT_STRIP_SOFT_HYPHENS,
+        )
         if self.szContentSlug is None or self.szContentSlug == "" or " " in self.szContentSlug:
             # print("ку-ку", self.szContentHead)
-            result_slug = pytils.translit.slugify(
-                safe_html_special_symbols(self.szContentHead)).lower()
-            while TbContent.objects.filter(szContentSlug=result_slug).count() != 0:
-                result_slug = "%s-%x" % (result_slug[0: -3], int(random.uniform(0, 255)))
+            base_slug = clean_text_to_slug(self.szContentHead)
+            result_slug = base_slug
+            suffix = 1
+            while TbContent.objects.filter(szContentSlug=result_slug).exists():
+                result_slug = f"{base_slug}-{suffix}"
+                suffix += 1
             self.szContentSlug = result_slug
-        if self.bTypograf:
-            # Используем типограф Eugene Spearance (https://www.typograf.ru) через API
-            # Настройки стиля типографики см. тут: https://www.typograf.ru/webservice/about/
-            try:
-                http = urllib3.PoolManager()
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentHead.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '	<!-- Абзацы НЕ СТАВИМ-->'
-                                                   '	<paragraph insert="0" />'
-                                                   '    <!-- Переводы строк НЕ СТАВИМ -->'
-                                                   '	<newline insert="0" />'
-                                                   '	<!-- Неразрывные конструкции ДА -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Переносы слов длиннее 12 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '</preferences>'.encode('cp1251')})
-                result = resp.data.decode('cp1251')
-                if len(result) <= 512:
-                    self.szContentHead = result
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentIntro.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '    <!-- Висячая пунктуация УДАЛЯЕТСЯ -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Висячие слова УДАЛЯЕМ -->'
-                                                   '	<hanging-line delete="1" />'
-                                                   '	<!-- Переносы  слов длиннее 12 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '    <!-- Параметры ссылок -->'
-                                                   '	<link target="_blank" />'
-                                                   '</preferences>'.encode('cp1251')})
-                self.szContentIntro = resp.data.decode('cp1251')
-                resp = http.request("POST", "https://www.typograf.ru/webservice/",
-                                    fields={"text": self.szContentBody.encode('cp1251'),
-                                            'xml': '<?xml version="1.0" encoding="windows-1251" ?>'
-                                                   '<preferences>'
-                                                   '    <!-- Висячая пунктуация УДАЛЯЕТСЯ -->'
-                                                   '	<hanging-punct insert="1" />'
-                                                   '	<!-- Висячие слова УДАЛЯЕМ -->'
-                                                   '	<hanging-line delete="1" />'
-                                                   '	<!-- Переносы  слов длиннее 10 знаков -->'
-                                                   '	<hyphen insert="1" length="12" />'
-                                                   '    <!-- Параметры ссылок -->'
-                                                   '	<link target="_blank" />'
-                                                   '</preferences>'.encode('cp1251')})
-                self.szContentBody = resp.data.decode('cp1251')
-            except:
-                # если API типографа не доступен, то подключаем локальный типограф Муравьева
-                import web.EMT as EMT
-                emt_header = EMT.EMTypograph()
-                emt_header.setup({'Text.paragraphs': 'off'})
-                emt_header.set_text(self.szContentHead)
-                self.szContentHead = emt_header.apply()
-                emt_intro = EMT.EMTypograph()
-                # print("==================================== self.szContentBody\n", self.szContentIntro)
-                # print("-----------------")
-                emt_intro.set_text(self.szContentIntro)
-                # emt_intro.set_tag_layout(layout=EMT.LAYOUT_CLASS)
-                self.szContentIntro = emt_intro.apply()
-                self.szContentIntro = post_processing_html(self.szContentIntro)
-                # print(self.szContentIntro)
-                emt_body = EMT.EMTypograph()
-                # print("==================================== self.szContentBody")
-                # print(self.szContentBody)
-                # print("-----------------")
-                emt_body.set_text(self.szContentBody)
-                # emt_body.set_tag_layout(layout=EMT.LAYOUT_CLASS)
-                self.szContentBody = emt_body.apply()
-                self.szContentBody = post_processing_html(self.szContentBody)
-                # print(self.szContentBody)
-            self.bTypograf = False
+        if typograph_enabled:
+            # `etpgrf` уже умеет HTML-режим и висячую пунктуацию, поэтому здесь
+            # не нужен старый локальный fallback.
+            # Мягкие переносы убираем заранее: `etpgrf` не очищает их сам, а они
+            # потом мешают и типографу, и последующей нормализации текста.
+            # Для заголовка включаем левую висячую пунктуацию, а для анонса и
+            # тела текста оставляем обычную обработку без hanging punctuation.
+            if typograph_strip_soft_hyphens:
+                self.szContentHead = _strip_soft_hyphens(self.szContentHead)
+                self.szContentIntro = _strip_soft_hyphens(self.szContentIntro)
+                self.szContentBody = _strip_soft_hyphens(self.szContentBody)
+            head_typographer = _build_typographer(
+                mode=typograph_mode,
+                hyphenation=typograph_hyphenation,
+                sanitizer=typograph_sanitizer,
+                hanging_punctuation='left',
+            )
+            text_typographer = _build_typographer(
+                mode=typograph_mode,
+                hyphenation=typograph_hyphenation,
+                sanitizer=typograph_sanitizer,
+                hanging_punctuation=False,
+            )
+            self.szContentHead = _typograph_text(self.szContentHead, head_typographer)
+            self.szContentIntro = _typograph_text(self.szContentIntro, text_typographer)
+            self.szContentBody = _typograph_text(self.szContentBody, text_typographer)
         if self.dtContentCreate is None:
             self.dtContentCreate = datetime.datetime.now()
         super(TbContent, self).save(*args, **kwargs)
@@ -251,4 +288,10 @@ class TbContent(models.Model):
     class Meta:
         verbose_name = "Контент"
         verbose_name_plural = u"Контент"
+        # Чтобы боковая навигация или лента нне упиралась в SQLite и работала быстро,
+        # добавляем составные индексы.
+        indexes = [
+            models.Index(fields=['bContentPublish', 'tdContentPublishUp']),
+            models.Index(fields=['bContentPublish', 'tdContentPublishDown']),
+        ]
         ordering = ['-tdContentPublishUp', ]

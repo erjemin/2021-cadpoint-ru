@@ -1,51 +1,23 @@
 {% extends "base.jinja2" %}{% load static %}{% load thumbnail %}{% load slug_ru %}
 
-{% block META_OG %}{% comment %} РАЗМЕТКА Open Graph ДЛЯ СОЦ-СЕТЕЙ
-  подробности: https://habr.com/ru/company/macloud/blog/555082/{% endcomment %}
-  <meta property="og:title" content="CADPOINT.RU / {% if TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name|upper }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST %}СТРАНИЦА {{ PAGE_OF_LIST|add:'1' }}{% else %}ГЛАВНАЯ{% endif %}">{% comment %} Уникальное название страницы.
-   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook{% endcomment %}
-  <meta property="og:description" content="CADpoint / {% if TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST %}Страница {{ PAGE_OF_LIST|add:'1' }}{% else %}Главная{% endif %}" />{% comment %} Уникальное описание страницы.
-   Используется парсерами URL-адресов в социальных сетях, таких как Twitter или Facebook.{% endcomment %}
-  <meta property="og:image" content="{% static 'img/og-cadpoint-default.png' %}" />{% comment %} Изображение, отображаемое, когда вы
-   делитесь ссылкой на страницу в социальных сетях, приложениях чата или других сайтах,
-   которые очищают URL-адреса.
-   В идеале это должно быть квадратное изображение с важным содержанием, размещенным
-   в центре квадрата в прямоугольнике с соотношением сторон 2:1. Это гарантирует,
-   что изображение будет хорошо смотреться на карточках с изображениями прямоугольной
-   и квадратной формы.{% endcomment %}
-  <meta property="og:image:alt" content="cadpint.ru: новости 3D-печати и Систем Автоматичекого Проектирования" />{% comment %}
-   Описание изображения.
-   Не используйте этот метатег, если изображение носит чисто декоративный характер
-   и не содержит значимой информации. Программы чтения с экрана игнорируют
-   изображение, если мы предоставлен замещающий текст.{% endcomment %}
-  <meta property="og:locale" content="ru_RU" />{% comment %}  Естественный язык страницы.{% endcomment %}
-  <meta property="og:type" content="website" />{% comment %} Тип контента, которым вы делитесь,
-   например website, article, или video.movie{% endcomment %}
-  <meta property="og:url" content="https://cadpoint.ru{% if TAGS_L %}{{ TAGS_S }}{% endif %}{% if PAGE_OF_LIST %}/p{{ PAGE_OF_LIST }}{% endif %}" />{% comment %} Канонический URL страницы.
-   Обязательное свойство для допустимых страниц Open Graph.{% endcomment %}
-  <meta name="twitter:card" content="summary_large_image" />{% comment %} определяет, как будут выглядеть
-   карточки при публикации в Twitter. Есть два варианта для веб-сайтов: summary
-   и summary_large_image{% endcomment %}
-  <meta property="article:modified_time" content="{{ LENTA.0.dtContentTimeStamp|date:'c' }}" />
-  <meta property="article:published_time" content="{{ LENTA.0.tdContentPublishUp|date:'c' }}" />{% endblock %}
-
-<!--- ТИТУЛ --->
-{% block Title %}{% if TAGS_L %}Тема: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} - {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST %}Страница {{ PAGE_OF_LIST|add:'1' }}{% else %}Главная{% endif %}{% endblock %}
-{% block canonical %}https://cadpoint.ru{% if TAGS_L %}{{ TAGS_S }}{% endif %}{% if PAGE_OF_LIST %}/p{{ PAGE_OF_LIST }}{% endif %}{% endblock %}
-{% block Description %}CADpoint / {% if TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST %}Страница {{ PAGE_OF_LIST|add:'1' }}{% else %}Главная{% endif %}{% endblock %}
-{% block Keywords %}cadpoint, {% for I in TAGS_IN_PAGE %}{{ I.name }}, {% endfor %}новости{% if PAGE_OF_LIST %} , стр. {{ PAGE_OF_LIST|add:'1' }}{% endif %}{% endblock %}
-{% block Date4Meta %}{{ LENTA.0.tdContentPublishUp|date:'c' }}{% endblock %}"
-{% block Last4Meta %}{{ LENTA.0.dtContentTimeStamp|date:'c' }}{% endblock %}"
-{% block Expires4Meta %}{% now 'c' %}{% endblock %}"
-
+{% block page_title %}{% if EMPTY_STATE_TITLE %}{{ EMPTY_STATE_TITLE }}{% elif SELECTED_TAGS %}Тема: {% for I in SELECTED_TAGS %}{{ I.name }} - {% endfor %}{% elif TAGS_L %}Тема: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} - {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not EMPTY_STATE_TITLE %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS and not EMPTY_STATE_TITLE %}Главная{% endif %} | CADpoint{% endblock %}
+{% block meta_title %}{% if EMPTY_STATE_TITLE %}{{ EMPTY_STATE_TITLE }}{% elif SELECTED_TAGS %}Тема: {% for I in SELECTED_TAGS %}{{ I.name }} - {% endfor %}{% elif TAGS_L %}Тема: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} - {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not EMPTY_STATE_TITLE %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS and not EMPTY_STATE_TITLE %}Главная{% endif %} | CADpoint{% endblock %}
+{% block og_title %}{% if EMPTY_STATE_TITLE %}{{ EMPTY_STATE_TITLE }}{% elif SELECTED_TAGS %}Тема: {% for I in SELECTED_TAGS %}{{ I.name }} - {% endfor %}{% elif TAGS_L %}Тема: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} - {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not EMPTY_STATE_TITLE %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS and not EMPTY_STATE_TITLE %}Главная{% endif %} | CADpoint{% endblock %}
+{% block twitter_title %}{% if EMPTY_STATE_TITLE %}{{ EMPTY_STATE_TITLE }}{% elif SELECTED_TAGS %}Тема: {% for I in SELECTED_TAGS %}{{ I.name }} - {% endfor %}{% elif TAGS_L %}Тема: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} - {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not EMPTY_STATE_TITLE %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS and not EMPTY_STATE_TITLE %}Главная{% endif %} | CADpoint{% endblock %}
+{% block Description %}{% if EMPTY_STATE_MESSAGE %}{{ EMPTY_STATE_MESSAGE }}{% else %}CADpoint / {% if SELECTED_TAGS %}тег: {% for I in SELECTED_TAGS %}{{ I.name }} / {% endfor %}{% elif TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not SELECTED_TAGS %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS %}Главная{% endif %}{% endif %}{% endblock %}
+{% block meta_description %}{% if EMPTY_STATE_MESSAGE %}{{ EMPTY_STATE_MESSAGE }}{% else %}CADpoint / {% if SELECTED_TAGS %}тег: {% for I in SELECTED_TAGS %}{{ I.name }} / {% endfor %}{% elif TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not SELECTED_TAGS %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS %}Главная{% endif %}{% endif %}{% endblock %}
+{% block og_description %}{% if EMPTY_STATE_MESSAGE %}{{ EMPTY_STATE_MESSAGE }}{% else %}CADpoint / {% if SELECTED_TAGS %}тег: {% for I in SELECTED_TAGS %}{{ I.name }} / {% endfor %}{% elif TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not SELECTED_TAGS %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS %}Главная{% endif %}{% endif %}{% endblock %}
+{% block twitter_description %}{% if EMPTY_STATE_MESSAGE %}{{ EMPTY_STATE_MESSAGE }}{% else %}CADpoint / {% if SELECTED_TAGS %}тег: {% for I in SELECTED_TAGS %}{{ I.name }} / {% endfor %}{% elif TAGS_L %}тег: {% for I in TAGS_IN_PAGE %}{% if I.slug in TAGS_L %}{{ I.name }} / {% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST and not SELECTED_TAGS %}Страница {{ PAGE_OF_LIST|add:'1' }}{% elif not SELECTED_TAGS %}Главная{% endif %}{% endif %}{% endblock %}
+{% block Keywords %}cadpoint, {% if SELECTED_TAGS %}{% for I in SELECTED_TAGS %}{{ I.name }}, {% endfor %}{% else %}{% for I in TAGS_IN_PAGE %}{{ I.name }}, {% endfor %}{% endif %}новости{% if PAGE_OF_LIST %} , стр. {{ PAGE_OF_LIST|add:'1' }}{% endif %}{% endblock %}
 
 {% block CONTENT %}{#  <!-- ХЛЕБНЫЕ КРОШКИ: НАЧАЛО -->#}
   <div class="container bread-crumb">
     <div class="row">
       <nav  class="col-12 х" aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% for t in TAGS_IN_PAGE %}{% if t.slug in TAGS_L %}
-          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag" title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endif %}{% endfor %}{% if PAGE_OF_LIST %}
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>{% if SELECTED_TAGS %}{% for t in SELECTED_TAGS %}
+          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag" title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endfor %}{% else %}{% for t in TAGS_IN_PAGE %}{% if t.slug in TAGS_L %}
+          <li class="breadcrumb-item nw s"><a href="{{ TAGS_S|rm_tag:t.slug }}"><i class="bi bi-tag" title="тэг"></i>&#8199;{{ t.name }}</a></li>{% endif %}{% endfor %}{% endif %}{% if PAGE_OF_LIST %}
           <li class="breadcrumb-item active nw s" aria-current="page">Страница {{ PAGE_OF_LIST|add:'1' }}</li>{%  endif %}
         </ol>
       </nav>
@@ -100,6 +72,21 @@
             </ul>
           </nav>
         </div>{# НАВИГАЦИЯ ПО СТРАНИЦАМ СО СПИСКАМИ КОНТЕНТА ИЗ ПРОИЗВОЛЬНОЙ КАТЕГОРИИ: КОНЕЦ #}{% endif %}
+        {% if not LENTA %}
+        <div class="row default-list">
+          <div class="col-12">
+            <div class="alert alert-warning mb-0" role="alert">
+              <h3 class="h5 mb-2">{% if EMPTY_STATE_TITLE %}{{ EMPTY_STATE_TITLE }}{% else %}Новостей не найдено{% endif %}</h3>
+              <p class="mb-0">{% if EMPTY_STATE_MESSAGE %}{{ EMPTY_STATE_MESSAGE }}{% else %}По выбранному разделу пока нет новостей.{% endif %}</p>
+              <p class="mb-0 mt-3">
+                <a href="/">На главную</a>
+                <span class="mx-2">&middot;</span>
+                <a href="/alltags">Все теги</a>
+              </p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>{#<!-- POINT-СРАНИЦА: КОНЕЦ -->#}{% endblock %}

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import template
-from web.add_function import safe_html_special_symbols
-import pytils
+from web.add_function import clean_text_to_slug, safe_html_special_symbols
 
 register = template.Library()
 
@@ -16,9 +15,9 @@ def slug_ru(value: str, arg: int) -> str:
     """
     try:
         arg = int(arg)
-        return pytils.translit.slugify(str(value).lower())[:int(arg)]
+        return clean_text_to_slug(str(value))[:int(arg)]
     except ValueError:
-        return pytils.translit.slugify(str(value).lower())
+        return clean_text_to_slug(str(value))
 
 
 @register.filter

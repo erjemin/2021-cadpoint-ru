@@ -1,15 +1,13 @@
+{% load static %}
 <!-- СОГЛАСИЕ НА КУКИ: НАЧАЛО -- соглашение о сборе технической информации -->
   <noindex id="cookies_accept" class="fixed-bottom container-fluid">
     <div class="row bg-dark text-white">
       <div class="col p-4 mb-0 text-center">
-        <small>Тут используют cookie и&nbsp;ведут сбор технических данных о&nbsp;посещениях, потому как без этого <nobr>интернет-сайты</nobr> вообще почти не&nbsp;работают&hellip;</small>
-        <button onclick="CookieAcceptDate = new Date();
-                         CookieAcceptDate.setTime(CookieAcceptDate.getTime() + 7948800000);
-                         document.cookie = 'cookie_accept=yes;expires=' + CookieAcceptDate;
-                         document.getElementById('cookies_accept').remove();"
-                class="btn ml-4 py-2 px-4 btn-warning">
+        <small>В&nbsp;соответствии с&nbsp;<abbr title="General Data Protection Regulation">GDPR</abbr> и&nbsp;152-<abbr title="Федеральный закон">ФЗ</abbr>, уведомляем вас, что настоящий сайт использует инструменты для&nbsp;сбора данных о&nbsp;поведении пользо­вателей, с&nbsp;целью аналитики и&nbsp;улучшения своей работы&hellip;</small>
+        <button id="cookies_accept_button" class="btn ml-4 py-2 px-4 ms-5 btn-warning">
           Я согласен!
         </button>
       </div>
     </div>
-  </noindex><!-- СОГЛАСИЕ НА КУКИ: КОНЕЦ -->
+  </noindex>
+  <script defer src="{% static 'js/accept-cookies.js' %}"></script><!-- СОГЛАСИЕ НА КУКИ: КОНЕЦ -->
