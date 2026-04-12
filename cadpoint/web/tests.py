@@ -143,6 +143,44 @@ class TagAutocompleteTests(TestCase):
 		self.assertEqual(payload['pagination']['more'], False)
 
 
+class AllTagsPageTests(TestCase):
+	def setUp(self):
+		user_model = get_user_model()
+		self.user = user_model.objects.create_superuser(
+			username='admin',
+			email='admin@example.com',
+			password='password',
+		)
+		self.client.force_login(self.user)
+
+		item1 = TbContent.objects.create(
+			szContentHead='Тест 1',
+			szContentIntro='Анонс 1',
+			szContentBody='Тело 1',
+			szContentSlug='test-1',
+			bContentPublish=True,
+		)
+		item2 = TbContent.objects.create(
+			szContentHead='Тест 2',
+			szContentIntro='Анонс 2',
+			szContentBody='Тело 2',
+			szContentSlug='test-2',
+			bContentPublish=True,
+		)
+		item1.tags.add('alpha', 'beta')
+		item2.tags.add('alpha')
+
+	def test_alltags_page_lists_all_tags_with_counts(self):
+		response = self.client.get(reverse('web_alltags'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Все теги сайта')
+		self.assertContains(response, '/tag_alpha')
+		self.assertContains(response, '/tag_beta')
+		self.assertContains(response, '<b class="_tag">2</b>')
+		self.assertContains(response, '<b class="_tag">1</b>')
+
+
 class TypographTests(TestCase):
 	def test_save_generates_slug_from_clean_text(self):
 		item = TbContent(szContentHead='<b>Привет&nbsp;мир</b>')

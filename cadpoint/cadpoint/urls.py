@@ -30,6 +30,7 @@ urlpatterns = [
     re_path(r'^p(?P<ppage>\d*)$', views.index),
     re_path(r'^tag_(?P<slug_tags>[^/]*)$', views.index),
     re_path(r'^tag_(?P<slug_tags>[^/]*)[^/]*/p(?P<ppage>\d*)$', views.index),
+    re_path(r'^alltags$', views.alltags, name='web_alltags'),
     # Статья
     re_path(r'^item/(?P<content_id>\d*)-\S*$', views.show_item),
     # После чистки кросс-ссылок в контенте legacy Joomla-редиректы временно

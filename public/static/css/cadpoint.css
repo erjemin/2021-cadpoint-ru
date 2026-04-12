@@ -319,7 +319,7 @@ div.news > nav.row { margin: 0; }
 }
 /* левые треугольные хвостики не активного тега (с ненулевой представленностью на странице) серые */
 .tags > a.tag-not-active:before {
-  background: -moz-linear-gradient(45deg, #ccc 0%, #888 100%);7
+  background: -moz-linear-gradient(45deg, #ccc 0%, #888 100%);
   background: -webkit-gradient(linear, left bottom, right top, color-stop(0%,#ccc), color-stop(100%,#888));
   background: -webkit-linear-gradient(-45deg, #ccc 0%,#888 100%);
   background: -o-linear-gradient(45deg, #ccc 0%,#888 100%);
@@ -356,6 +356,10 @@ div.news > nav.row { margin: 0; }
 .tags > a.tag-active:hover .tag-note { color: #008DD2; }
 .tags > a.tag-not-active:hover .tag-note { color: #008DD2; }
 .tags > a:not(:hover), .tags > a:not(:hover) .tag-note { transition:1s; }
+
+/* Для страницы всех тегов */
+a.tag-active > .tag-note > ._tag { color: #fee; transition:0.5s;}
+a.tag-active:hover > .tag-note > ._tag { color: #008DD2; transition:0.5s;}
 
 /****************************
 ** ОФОРМЛЕНИЕ ТЕГОВ *********

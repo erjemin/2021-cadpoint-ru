@@ -60,6 +60,24 @@ def tag_autocomplete(request):
     return JsonResponse({"results": results, "pagination": {"more": more}})
 
 
+@require_GET
+def alltags(request):
+    """Показывает все теги сайта и число их вхождений во всех публикациях."""
+    template = "alltags.jinja2"
+    to_template: dict[str, object] = {"COOKIES": check_cookies(request)}
+
+    q_tags = (
+        Tag.objects.annotate(
+            NumTotal=Count("taggit_taggeditem_items", distinct=True),
+        )
+        .filter(NumTotal__gt=0)
+        .order_by("-NumTotal", "name")
+    )
+
+    to_template["TAGS_IN_PAGE"] = q_tags
+    return render(request, template, to_template)
+
+
 def index(request,
           slug_tags: str = "",
           ppage: int = 0):
