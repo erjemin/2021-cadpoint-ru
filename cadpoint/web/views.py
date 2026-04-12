@@ -26,6 +26,30 @@ def handler404(request, exception: str):
     return response
 
 
+def handler400(request, exception: Exception):
+    """ Обработчик ошибки 400
+
+    :param request:
+    :param exception:
+    :return: response:
+    """
+    response = render(request, "400.html", {"MSG": exception})
+    response.status_code = 400
+    return response
+
+
+def handler403(request, exception: Exception):
+    """ Обработчик ошибки 403
+
+    :param request:
+    :param exception:
+    :return: response:
+    """
+    response = render(request, "403.html", {"MSG": exception})
+    response.status_code = 403
+    return response
+
+
 def handler500(request):
     """ Обработчик ошибки 500
 

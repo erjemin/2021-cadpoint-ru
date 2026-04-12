@@ -57,6 +57,8 @@ urlpatterns = [
 ]
 
 handler404 = 'web.views.handler404'
+handler400 = 'web.views.handler400'
+handler403 = 'web.views.handler403'
 handler500 = 'web.views.handler500'
 
 if settings.DEBUG:

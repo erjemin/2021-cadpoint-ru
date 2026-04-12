@@ -13,7 +13,12 @@ from web.legacy_links import build_canonical_url, replace_legacy_links
 from web.models import TbContent
 
 
+# Этот файл смешивает два типа проверок:
+# - простые тесты чистой логики без базы данных (`SimpleTestCase`),
+# - интеграционные Django-тесты с базой и HTTP-клиентом (`TestCase`).
 class LegacyLinksTests(SimpleTestCase):
+	# `SimpleTestCase` подходит для функций, которые не ходят в базу и не
+	# требуют полноценного HTTP-запроса: здесь мы просто проверяем строки.
 	def test_build_canonical_url_without_slug(self):
 		self.assertEqual(build_canonical_url(123, ''), '/item/123-')
 
@@ -42,6 +47,7 @@ class LegacyLinksTests(SimpleTestCase):
 		self.assertEqual(len(matches), 1)
 
 
+# Эти тесты тоже без базы: проверяем очистку HTML и подготовку slug'ов.
 class SafeHtmlSpecialSymbolsTests(SimpleTestCase):
 	def test_strips_html_tags_and_decodes_entities(self):
 		text = '<p>&laquo;Привет&nbsp;<b>мир</b>&raquo; &shy;<script>alert(1)</script><style>p{}</style></p>'
@@ -54,6 +60,7 @@ class SafeHtmlSpecialSymbolsTests(SimpleTestCase):
 		self.assertEqual(clean_text_to_slug('₽ € $ ₴ ₿'), 'content')
 
 
+# Здесь проверяем форму админки: её поля, виджеты и виртуальные настройки.
 class AdminTypographFormTests(SimpleTestCase):
 	def test_admin_form_exposes_virtual_typograph_fields(self):
 		form = AdminContentForm()
@@ -100,7 +107,11 @@ class AdminTypographFormTests(SimpleTestCase):
 		self.assertEqual(str(item), '007: «Привет мир»')
 
 
+# В этих тестах уже нужна база и `client`, потому что мы проверяем Django-views
+# и JSON-ответы как реальные запросы из браузера.
 class TagAutocompleteTests(TestCase):
+	# `TestCase` поднимает тестовую БД, а `client` умеет делать полноценные запросы
+	# к Django, как будто их отправил браузер.
 	def setUp(self):
 		user_model = get_user_model()
 		self.user = user_model.objects.create_superuser(
@@ -150,6 +161,7 @@ class TagAutocompleteTests(TestCase):
 		self.assertEqual(payload['pagination']['more'], False)
 
 
+# Страница со всеми тегами — тоже обычный Django-response, поэтому тут `TestCase`.
 class AllTagsPageTests(TestCase):
 	def setUp(self):
 		user_model = get_user_model()
@@ -207,6 +219,7 @@ class AllTagsPageTests(TestCase):
 		self.assertNotContains(response, 'onclick="CookieAcceptDate')
 
 
+# Здесь проверяем поведение страницы тега, включая пустое состояние.
 class TagEmptyStateTests(TestCase):
 	def setUp(self):
 		self.item = TbContent.objects.create(
@@ -242,6 +255,7 @@ class TagEmptyStateTests(TestCase):
 		self.assertContains(response, 'не найден или был переименован')
 
 
+# Тут мы проверяем модель и `save()`: slug, типограф, счётчик просмотров и SEO-поля.
 class TypographTests(TestCase):
 	def test_save_generates_slug_from_clean_text(self):
 		item = TbContent(szContentHead='<b>Привет&nbsp;мир</b>')
@@ -410,6 +424,7 @@ class TypographTests(TestCase):
 		self.assertNotContains(response, 'None')
 
 
+# Это тесты карты сайта: проверяем, что в XML попадают только публичные страницы.
 class SitemapTests(TestCase):
 	def setUp(self):
 		self.published = TbContent.objects.create(
@@ -444,6 +459,8 @@ class SitemapTests(TestCase):
 		self.assertNotContains(response, 'skrytaya-statya')
 
 
+# Для error-handlers удобно использовать `RequestFactory`: мы сами создаём
+# request и вызываем функцию-обработчик напрямую, без прохода через URL-роутинг.
 class ErrorHandlersTests(SimpleTestCase):
 	def setUp(self):
 		self.factory = RequestFactory()
@@ -469,7 +486,7 @@ class ErrorHandlersTests(SimpleTestCase):
 		self.assertEqual(response.status_code, 403)
 		self.assertContains(response, 'CADpoint.ru - http 403 error', status_code=403)
 		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=403)
-		self.assertContains(response, 'доступ к этой странице ограничен.', status_code=403)
+		self.assertContains(response, 'доступ к&nbsp;этой странице ограничен.', status_code=403)
 
 	def test_handler404_renders_modern_template(self):
 		response = self.client.get('/no-such-page/')
@@ -477,7 +494,7 @@ class ErrorHandlersTests(SimpleTestCase):
 		self.assertEqual(response.status_code, 404)
 		self.assertContains(response, 'CADpoint.ru - http 404 error', status_code=404)
 		self.assertContains(response, '<meta name="robots" content="noindex,nofollow" />', status_code=404)
-		self.assertContains(response, 'похоже, такой страницы больше нет.', status_code=404)
+		self.assertContains(response, 'похоже, такой страницы или картинки больше нет.', status_code=404)
 
 	def test_handler500_renders_modern_template(self):
 		from web.views import handler500
