@@ -1,0 +1,46 @@
+# Исключаем мусор и локальные артефакты, чтобы Docker-контекст был компактным.
+
+# Git и IDE-файлы в образ не нужны.
+.git
+.github
+.idea
+.DS_Store
+
+# Секреты и локальные настройки не должны попадать в контейнерный контекст.
+.env
+.env.*
+
+# Виртуальное окружение и служебные артефакты Python.
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+.tox/
+
+# Локальные базы и дампы SQLite в контейнер не тащим.
+*.sqlite3
+database/
+
+# Локальная сборка фронтенда пока не нужна в Docker-контексте.
+# Если позже соберём frontend внутри Docker, это правило можно пересмотреть.
+frontend-assembly/
+
+# Загруженные медиа-файлы монтируются отдельно и не должны раздувать контекст.
+public/media/
+
+# Документация и служебные git-ignore-файлы не нужны в runtime-образе.
+*.md
+**/.gitignore
+
+# Будущие Dockerfile и основной compose-файл обычно храним в репозитории,
+# поэтому их НЕ игнорируем. Игнорируем только локальные override-варианты.
+docker-compose.override.yml
+compose.override.yml
+docker-compose.local.yml
+compose.local.yml
+
