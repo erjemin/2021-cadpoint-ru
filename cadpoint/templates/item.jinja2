@@ -79,15 +79,15 @@
   </div>{#<!-- ХЛЕБНЫЕ КРОШКИ: КОНЕЦ -->#}
   {#<!-- POINT-СРАНИЦА: НАЧАЛО -->#}<div class="container news">
     <div class="row">
-      <div class="col-12 col-md-9">
+      <article class="col-12 col-md-9" aria-labelledby="article-title">
         <time datetime="{{ ITEM.tdContentPublishUp|date:'Y-m-d' }}">{{ ITEM.tdContentPublishUp|date:'d E Y' }} <small>({{ ITEM.tdContentPublishUp|date:'l'|lower }})  <small title="Число просмотров"><i class="bi bi-eye-fill"></i>&nbsp;{{ ITEM.iContentHits }}</small></small> </time>
-        <h1>{{ ITEM.szContentHead|safe }}</h1>
+        <h1 id="article-title">{{ ITEM.szContentHead|safe }}</h1>
         {{ ITEM.szContentIntro|safe }}
         {{ ITEM.szContentBody|safe }}
         {{ ITEM.szPointDes|safe }}{#  Текст страницы или приамбула перед списком #}
         <hr />
         <nav class="sm-tags">{% for t in ITEM.tags.all%}<a href="/tag_{{ t.slug|lower }}"><i class="bi bi-tag" title="тег"></i> {{ t.name|lower }}</a> &nbsp;  &#8198; {% endfor %}</nav>
-      </div>
+      </article>
       {#<!-- БОКОВАЯ НАВИГАЦИЯ: НАЧАЛО-->#}<nav class="col order-last order-md-first">
         <div></div>{% for i in ITEMS_BEFORE reversed %}{% if i.id != ITEM.id %}<div>
             <time datetime="{{ i.tdContentPublishUp|date:'Y-m-d' }}">{{ i.tdContentPublishUp|date:'d E Y' }}</time>

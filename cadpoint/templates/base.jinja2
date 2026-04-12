@@ -41,7 +41,8 @@
   </script>{% endblock %}
 </head>
 <body>{% block BODY %}
-  {% block Top_CSS1 %}{% endblock %}{% block Top_CSS2 %}{% endblock %}{% block Top_CSS3 %}{% endblock %}{% include "blocks/header_nav.jinja2" %}{% block CONTENT %}{% endblock %}
+  {% block Top_CSS1 %}{% endblock %}{% block Top_CSS2 %}{% endblock %}{% block Top_CSS3 %}{% endblock %}{% include "blocks/header_nav.jinja2" %}
+  <main id="main-content">{% block CONTENT %}{% endblock %}</main>
   {% include "blocks/footer.jinja2" %}{% if COOKIES %}
   {% include "blocks/accept-cookies.jinja2" %}{% endif %}
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>

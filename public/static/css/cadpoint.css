@@ -87,7 +87,7 @@ div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a {
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags { margin-bottom: 2ex; }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a,
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > span.active,
-div.news > div.row > div[class^="col"] > nav.sm-tags > a {
+div.news > div.row > article[class^="col"] > nav.sm-tags > a {
   font-family: 'Ubuntu Condensed', sans-serif;
   font-size: smaller;
   display: inline-block;
@@ -101,13 +101,13 @@ div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tag
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > h3 > a:hover,
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover,
-div.news > div.row > div[class^="col"] > nav.sm-tags > a:hover {
+div.news > div.row > article[class^="col"] > nav.sm-tags > a:hover {
   color: #008DD2;
   border-bottom: 1px solid #008DD2;
   transition:0.6s;
 }
 div.lenta > div.row > div[class^="col"] div.row > div[class^="col"] > nav.sm-tags > a:hover,
-div.news > div.row > div[class^="col"] > nav.sm-tags > a:hover {
+div.news > div.row > article[class^="col"] > nav.sm-tags > a:hover {
   animation-name: scaleUpDown2;
   animation-duration: 0.6s;
   animation-timing-function: ease-in-out; -webkit-animation-timing-function: ease-in-out;
@@ -150,33 +150,33 @@ div.lenta > div.row > div[class^="col"] > div.row:not(:last-child) { border-bott
 /****************************
 ** ОФОРМЛЕНИЕ НОВОСТИ *********
 ****************************/
-div.news > div.row > div[class^="col"] > time {
+div.news > div.row > article[class^="col"] > time {
   font-family: 'Ubuntu Condensed', sans-serif;
   color: #888;
   font-size: 120%;
   font-weight: 100;
 }
-div.news > div.row > div[class^="col"] > time > small > small {
+div.news > div.row > article[class^="col"] > time > small > small {
   font-size: x-small;
   color: #006799;
   padding-left: 4em;
 }
-div.news > div.row > div[class^="col"] > p,
-div.news > div.row > div[class^="col"] > ul > li,
-div.news > div.row > div[class^="col"] > ol > li {
+div.news > div.row > article[class^="col"] > p,
+div.news > div.row > article[class^="col"] > ul > li,
+div.news > div.row > article[class^="col"] > ol > li {
   font-size: 115%;
   font-weight: 100;
 }
-div.news > div.row > div[class^="col"] > p > img,
-div.news > div.row > div[class^="col"] > p > iframe {
+div.news > div.row > article[class^="col"] > p > img,
+div.news > div.row > article[class^="col"] > p > iframe {
   width: 100%;
   border: solid #006799 1px;
   border-radius: 4px;
   border-bottom: solid white 12px;
   border-image: url('/static/svgs/logo_cadpoint-2021-border.svg') 0 0 600 0 round;
 }
-div.news > div.row > div[class^="col"] > p > iframe { aspect-ratio: calc( 19 / 9); }
-div.news > div.row > div[class^="col"] > blockquote {
+div.news > div.row > article[class^="col"] > p > iframe { aspect-ratio: calc( 19 / 9); }
+div.news > div.row > article[class^="col"] > blockquote {
   font-family: 'Ubuntu Condensed', sans-serif;
   font-weight: 100;
   color: #006799;
@@ -189,7 +189,7 @@ div.news > div.row > div[class^="col"] > blockquote {
   background:#EDEDED;
   border-radius: 10px 35px 35px 10px;
 }
-div.news > div.row > div[class^="col"] > blockquote:before{
+div.news > div.row > article[class^="col"] > blockquote:before{
   /*content: "\201C";*/
   content: "«";
   color:gray;
@@ -197,11 +197,11 @@ div.news > div.row > div[class^="col"] > blockquote:before{
   position: absolute;
   left: 0; top:-1ex;
 }
-div.news > div.row > div[class^="col"] > hr {
+div.news > div.row > article[class^="col"] > hr {
   margin: -30px auto 20px; padding: 0; color: transparent; height: 50px;
   border: none; border-bottom: 1px dashed #006799; box-shadow: 0 20px 20px -20px gray;
 }
-div.news > div.row > div[class^="col"] > nav.sm-tags {
+div.news > div.row > article[class^="col"] > nav.sm-tags {
     padding-bottom: 2em;
 }
 div.news > div.row > nav[class^="col"] {

@@ -181,6 +181,7 @@ class AllTagsPageTests(TestCase):
 		response = self.client.get(reverse('web_alltags'))
 
 		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, '<main id="main-content">')
 		self.assertContains(response, 'Все теги сайта')
 		self.assertContains(response, '/tag_alpha')
 		self.assertContains(response, '/tag_beta')
@@ -345,6 +346,8 @@ class TypographTests(TestCase):
 		response = self.client.get(f'/item/{item.id}-wrong-slug')
 
 		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, '<main id="main-content">')
+		self.assertContains(response, '<article class="col-12 col-md-9" aria-labelledby="article-title">')
 		self.assertContains(response, '<title>Проверка просмотра | CADpoint</title>')
 		self.assertContains(
 			response,
