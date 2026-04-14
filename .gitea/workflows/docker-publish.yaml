@@ -38,11 +38,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          # Сначала пробуем репозиторные секреты REPO_USER/REPO_PASS,
-          # а если их нет — используем встроенную пару actor + GITHUB_TOKEN.
-          # Это защищает workflow от пустых значений в Gitea Actions.
-          username: ${{ secrets.REPO_USER || github.actor }}
-          password: ${{ secrets.REPO_PASS || secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       # Извлечение метаданных (тегов и лейблов) для Docker
       - name: Extract metadata (tags, labels) for Docker
