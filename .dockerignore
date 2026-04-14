@@ -9,6 +9,7 @@
 # Секреты и локальные настройки не должны попадать в контейнерный контекст.
 .env
 .env.*
+.env.sample
 
 # Виртуальное окружение и служебные артефакты Python.
 .venv/
@@ -25,6 +26,7 @@ htmlcov/
 # Локальные базы и дампы SQLite в контейнер не тащим.
 *.sqlite3
 database/
+media/
 
 # Локальная сборка фронтенда пока не нужна в Docker-контексте.
 # Если позже соберём frontend внутри Docker, это правило можно пересмотреть.
@@ -37,10 +39,8 @@ public/media/
 *.md
 **/.gitignore
 
-# Будущие Dockerfile и основной compose-файл обычно храним в репозитории,
-# поэтому их НЕ игнорируем. Игнорируем только локальные override-варианты.
-docker-compose.override.yml
-compose.override.yml
-docker-compose.local.yml
-compose.local.yml
+# Репозиторные и оркестрационные файлы не нужны внутри runtime-образа.
+.gitea/
+Dockerfile
+docker-compose*.yml
 
