@@ -23,7 +23,7 @@ services:
     # Но миграции оставляем, чтобы база была актуальной.
     command: >
       sh -c "python manage.py migrate --noinput &&
-             gunicorn --workers 1 --bind 0.0.0.0:8000 --reload cadpoint.wsgi:application"
+             python -m gunicorn --workers 1 --bind 0.0.0.0:8000 --reload cadpoint.wsgi:application"
 
     # 2. МОНТИРОВАНИЕ КОДА (Live Reload)
     # Подключаем локальные папки внутрь контейнера, чтобы Gunicorn видел изменения без пересборки образа.

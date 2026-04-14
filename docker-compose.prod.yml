@@ -41,7 +41,7 @@ services:
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput --clear &&
              mkdir -p /nginx_configs_host/nginx &&
-             sed \"s|/home/user/app/cadpoint-site|${HOST_PROJECT_PATH:-/home/default_user/projects/cadpoint-site}|g\" /nginx_configs_host/nginx/cadpoint-app--external-nginx.conf > /nginx_configs_host/nginx/nginx_cadpoint.conf.example &&
+              sed \"s|/home/user/app/cadpoint-site|${HOST_PROJECT_PATH:-/home/default_user/projects/cadpoint-site}|g\" /home/app/web/config/nginx/cadpoint-app--external-nginx.conf > /nginx_configs_host/nginx/nginx_cadpoint.conf.example &&
              if [ ! -f /nginx_configs_host/nginx/cadpoint-app--external-nginx.conf ]; then
                  cp /nginx_configs_host/nginx/nginx_cadpoint.conf.example /nginx_configs_host/nginx/cadpoint-app--external-nginx.conf;
                  echo 'INIT: Created new nginx config with correct paths';
@@ -59,7 +59,7 @@ services:
              cp /home/app/web/public/static/svgs/cappoint_under_reconstruction.svg "$$ERROR_DIR/svgs/cappoint_under_reconstruction.svg" &&
              cp /home/app/web/public/static/img/favicon.png "$$ERROR_DIR/img/favicon.png" &&
              cp /home/app/web/public/static/img/favicon.ico "$$ERROR_DIR/img/favicon.ico" &&
-             gunicorn --workers 2 --bind 0.0.0.0:8000 cadpoint.wsgi:application"
+             python -m gunicorn --workers 2 --bind 0.0.0.0:8000 cadpoint.wsgi:application"
 
     # 4. Проброс портов (Внешний Nginx -> localhost:8050)
     ports:
@@ -81,7 +81,10 @@ services:
       - ./config:/nginx_configs_host
 
     # 6. Пользователь и права
-    user: "1000:1000"
+    # На первом старте контейнеру нужны права на инициализацию bind-mount'ов
+    # (media/config/database) на хосте, иначе `mkdir` для `media/_error` падает с Permission denied.
+    # После первичной инициализации можно будет отдельно ужесточить права на уровне хоста.
+    user: "0:0"
 
     # Когда нужна отладка процессов внутри контейнера, можно временно раскомментировать эту строку и запустить контейнер с правами root.
     # cap_add:
