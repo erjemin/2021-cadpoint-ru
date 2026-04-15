@@ -57,8 +57,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
-    # Панель отладки показываем только в dev-окружении при `DEBUG=True`.
-    'debug_toolbar',
     'django_select2',
     'easy_thumbnails',
     'filer.apps.FilerConfig',
@@ -70,8 +68,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Middleware нужен, иначе панель debug toolbar просто не влезет в response.
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -160,6 +156,18 @@ CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
 # Внутренние адреса для debug toolbar: локальный браузер и loopback.
 INTERNAL_IPS = env.list('DJANGO_INTERNAL_IPS', default=['127.0.0.1', '::1'])
 
+# Django 5 требует явное описание хранилищ.
+# `default` нужен для загружаемых файлов (filer, FileField, ImageField) и смотрит в `MEDIA_ROOT`.
+# `staticfiles` остаётся отдельно: в dev используется обычная статика Django, в prod — WhiteNoise.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'OPTIONS': {
+            'location': MEDIA_ROOT,
+        },
+    },
+}
+
 # Параметры Select2 в админке.
 # Держим их здесь, чтобы не размазывать магические числа по `admin.py`.
 SELECT2_AJAX_DELAY_MS = 250
@@ -233,3 +241,29 @@ NUM_NAV_ITEMS_IN_PAGE = 7
 # Число статей (заголовок + тизер) на странице
 NUM_ITEMS_IN_PAGE = NUM_NAV_ITEMS_IN_PAGE
 
+
+if DEBUG:
+    # В деве оставляем стандартную отдачу статики Django без WhiteNoise.
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    }
+    # Django Debug Toolbar нужен только в dev
+    def _show_debug_toolbar(request):
+        """Скрывает debug toolbar внутри админки Django"""
+        return not request.path.startswith(f'/{ADMIN_URL}')
+
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE.insert(1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': _show_debug_toolbar,
+    }
+
+else:
+    # В проде WhiteNoise обслуживает собранную статику и файлы из `public`.
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    }
+    # Конфигурация WhiteNoise для обслуживания статических файлов и файлов из /public (например,
+    # robots.txt, favicon.ico и т.п.)
+    WHITENOISE_ROOT = PUBLIC_DIR
