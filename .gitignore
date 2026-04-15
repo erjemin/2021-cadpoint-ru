@@ -331,3 +331,5 @@ cython_debug/
 *.sql
 my_secret*.py
 .github/
+# для картинок
+_4image_and_design/
