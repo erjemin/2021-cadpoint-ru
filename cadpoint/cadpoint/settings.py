@@ -156,6 +156,18 @@ CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
 # Внутренние адреса для debug toolbar: локальный браузер и loopback.
 INTERNAL_IPS = env.list('DJANGO_INTERNAL_IPS', default=['127.0.0.1', '::1'])
 
+# Django 5 требует явное описание хранилищ.
+# `default` нужен для загружаемых файлов (filer, FileField, ImageField) и смотрит в `MEDIA_ROOT`.
+# `staticfiles` остаётся отдельно: в dev используется обычная статика Django, в prod — WhiteNoise.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'OPTIONS': {
+            'location': MEDIA_ROOT,
+        },
+    },
+}
+
 # Параметры Select2 в админке.
 # Держим их здесь, чтобы не размазывать магические числа по `admin.py`.
 SELECT2_AJAX_DELAY_MS = 250
@@ -232,10 +244,8 @@ NUM_ITEMS_IN_PAGE = NUM_NAV_ITEMS_IN_PAGE
 
 if DEBUG:
     # В деве оставляем стандартную отдачу статики Django без WhiteNoise.
-    STORAGES = {
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
-        },
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
     }
     # Django Debug Toolbar нужен только в dev
     def _show_debug_toolbar(request):
@@ -251,10 +261,8 @@ if DEBUG:
 else:
     # В проде WhiteNoise обслуживает собранную статику и файлы из `public`.
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-    STORAGES = {
-        'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-        },
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     }
     # Конфигурация WhiteNoise для обслуживания статических файлов и файлов из /public (например,
     # robots.txt, favicon.ico и т.п.)
