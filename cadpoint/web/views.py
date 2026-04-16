@@ -102,6 +102,18 @@ def alltags(request):
     return render(request, template, to_template)
 
 
+@require_GET
+def tmp(request):
+    """Dev-песочница для подготовки сложной вёрстки новостей в IDE."""
+    return render(
+        request,
+        "tmp.jinja2",
+        {
+            "COOKIES": check_cookies(request),
+        },
+    )
+
+
 def index(request,
           slug_tags: str = "",
           ppage: int = 0):

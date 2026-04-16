@@ -98,7 +98,7 @@ if settings.DEBUG:
     ]
 
     urlpatterns = [path('__debug__/', include(debug_toolbar.urls)), ] + urlpatterns
+    urlpatterns = [path('tmp/', views.tmp, name='web_tmp')] + urlpatterns
     urlpatterns = [*PUBLIC_ROOT_URLPATTERNS, *urlpatterns]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.PUBLIC_DIR.joinpath('static'))
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,0 +1,152 @@
+{% extends "base.jinja2" %}{% load static %}
+
+{% block page_title %}TMP: черновик вёрстки новости | CADpoint{% endblock %}
+{% block meta_title %}TMP: черновик вёрстки новости | CADpoint{% endblock %}
+{% block meta_description %}Временная dev-страница для сборки и отладки сложной вёрстки новостей.{% endblock %}
+{% block Description %}Временная dev-страница для подготовки сложной вёрстки новостей.{% endblock %}
+{% block Keywords %}tmp, cadpoint, dev, вёрстка, новость{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+{% block canonical %}{{ request.scheme }}://{{ request.get_host }}/tmp/{% endblock %}
+{% block og_url %}{{ request.scheme }}://{{ request.get_host }}/tmp/{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}TMP: черновик вёрстки новости | CADpoint{% endblock %}
+{% block og_description %}Временная dev-страница для подготовки сложной вёрстки новостей.{% endblock %}
+{% block twitter_title %}TMP: черновик вёрстки новости | CADpoint{% endblock %}
+{% block twitter_description %}Временная dev-страница для подготовки сложной вёрстки новостей.{% endblock %}
+{% block og_image %}{% static 'img/og-cadpoint-default.png' %}{% endblock %}
+{% block twitter_image %}{% static 'img/og-cadpoint-default.png' %}{% endblock %}
+
+{% block CONTENT %}
+  <div class="container bread-crumb">
+    <div class="row">
+      <nav class="col-12" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item nw s"><a href="/"><i class="bi bi-house-door" title="Главная"></i>&#8199;Главная</a></li>
+          <li class="breadcrumb-item active s" aria-current="page">TMP: вёрстка новости</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container news">
+    <div class="row">
+      <article class="col-12 col-md-9" aria-labelledby="tmp-article-title">
+        <time datetime="2050-01-01">01 января 2050 <small>(Суббота) <small title="Число просмотров"><i class="bi bi-eye-fill"></i>&nbsp;0000</small></small></time>
+
+        <!-- НАЧАЛО ВЕРСТКИ -->
+        <h1 id="tmp-article-title">Пример заголовка статьи с длинными словами, <span class="text-nowrap">HTML-тегами</span> и потенциально сложной типографикой</h1>
+
+        <p>
+          Никакого специального оформления для тизера нет (и не нужно). Тизер — это просто часть публикации.
+        </p>
+
+        <p><img alt="Пример" src="{% static 'img/og-cadpoint-default.png' %}" style="width:100%"/></p>
+
+        <h2>Подзаголовок первого смыслового блока</h2>
+        <p>
+          Здесь удобно собирать текстовый контент с разной плотностью: обычные абзацы,
+          <strong>выделения</strong>, <em>курсив</em>, <a href="#">ссылки</a>,
+          <code>inline code</code> и прочие штуки, которые потом попадут в реальную новость.
+        </p>
+        <p>
+          Можно вставить и более тяжёлый HTML: списки, таблицы, вложенные блоки, цитаты,
+          галереи, карточки и любой другой контент, который в обычной статье сложно быстро
+          оценить без отдельной песочницы.
+        </p>
+
+        <blockquote>
+          <p>Здесь можно проверить длинные цитаты, висячую пунктуацию и поведение типографа
+            на реальном HTML.</p>
+        </blockquote>
+
+        <h2>Карточки, списки и вспомогательные блоки</h2>
+        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h3 class="h5 card-title">Карточка №1</h3>
+                <p class="card-text mb-0">Проверка отступов, высот и поведения сетки Bootstrap.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h3 class="h5 card-title">Карточка №2</h3>
+                <p class="card-text mb-0">Можно подставить сюда любой сложный блок будущей новости.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2>Список</h2>
+        <ul>
+          <li>Пункт с обычным текстом.</li>
+          <li>Пункт с <strong>выделением</strong> и <a href="#">ссылкой</a>.</li>
+          <li>Пункт с длинным словом: сверхмногословнаятипографическаяконструкция.</li>
+        </ul>
+
+        <h2>Таблица</h2>
+        <div class="table-responsive mb-4">
+          <table class="table table-striped table-hover align-middle border-top border-bottom border-2">
+            <thead>
+              <tr>
+                <th scope="col">№</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Тема</th>
+                <th scope="col">Автор</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Примечание</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>01.04.2026</td><td>Вводный блок</td><td>Ерёмин</td><td>Черновик</td><td>Проверка ширины колонки.</td></tr>
+              <tr><td>2</td><td>02.04.2026</td><td>Типографика</td><td>Ерёмин</td><td>Готово</td><td>Длинные слова и переносы.</td></tr>
+              <tr><td>3</td><td>03.04.2026</td><td>Изображения</td><td>Ерёмин</td><td>В работе</td><td>Рядом с текстом и без налезания.</td></tr>
+              <tr><td>4</td><td>04.04.2026</td><td>Списки</td><td>Ерёмин</td><td>Готово</td><td>Маркированные и нумерованные.</td></tr>
+              <tr><td>5</td><td>05.04.2026</td><td>Цитаты</td><td>Ерёмин</td><td>Черновик</td><td>Проверка отступов и акцентов.</td></tr>
+              <tr><td>6</td><td>06.04.2026</td><td>Ссылки</td><td>Ерёмин</td><td>Готово</td><td>Внутренние и внешние URL.</td></tr>
+              <tr><td>7</td><td>07.04.2026</td><td>Карточки</td><td>Ерёмин</td><td>В работе</td><td>Плитка, сетка, отступы.</td></tr>
+              <tr><td>8</td><td>08.04.2026</td><td>Таблица</td><td>Ерёмин</td><td>Готово</td><td>Проверка адаптивности.</td></tr>
+              <tr><td>9</td><td>09.04.2026</td><td>Финальный прогон</td><td>Ерёмин</td><td>На ревью</td><td>Сборка перед публикацией.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- КОНЕЦ ВЕРСТКИ -->
+        <hr />
+        <nav class="sm-tags">
+          <a href="#"><i class="bi bi-tag" title="тег"></i> tmp</a> &nbsp;  &#8198;
+          <a href="#"><i class="bi bi-tag" title="тег"></i> news-layout</a> &nbsp;  &#8198;
+          <a href="#"><i class="bi bi-tag" title="тег"></i> typography</a> &nbsp;  &#8198;
+          <a href="#"><i class="bi bi-tag" title="тег"></i> html</a>
+        </nav>
+
+      </article>
+
+      <nav class="col order-last order-md-first" aria-label="Ближайшие новости">
+        <div>
+          <time datetime="2026-04-04">04 апреля 2026</time>
+          <p><i class="bi bi-newspaper"></i> <a href="#">Предыдущая новость для проверки боковой навигации</a></p>
+        </div>
+        <div class="active">
+          <time datetime="2026-04-05">05 апреля 2026</time>
+          <p><i class="bi bi-newspaper"></i> Текущая TMP-страница для вёрстки</p>
+        </div>
+        <div>
+          <time datetime="2026-04-06">06 апреля 2026</time>
+          <p><i class="bi bi-newspaper"></i> <a href="#">Следующая новость для проверки боковой навигации</a></p>
+        </div>
+      </nav>
+    </div>
+
+    <nav class="row" aria-label="Навигация по контенту">
+      <ul class="col offset-md-3 pagination px-1">
+        <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-left" title="Предыдущая"></i></a></li>
+      </ul>
+      <ul class="col pagination justify-content-end px-0">
+        <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-arrow-right" title="Следующая"></i></a></li>
+      </ul>
+    </nav>
+  </div>
+{% endblock %}
+
