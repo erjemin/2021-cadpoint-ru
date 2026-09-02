@@ -33,11 +33,13 @@ ADMIN_URL = _normalize_admin_url(env('ADMIN_URL', default='admin/'))
 
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
 
-
 ALLOWED_HOSTS = env.list(
     'DJANGO_ALLOWED_HOSTS',
     default=['127.0.0.1', 'localhost', 'cadpoint.ru'],
 )
+
+# Указывает Django доверять заголовку X-Forwarded-Proto от reverse proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #########################################
 # Настройки сообщений об ошибках когда все упало и т.п.
@@ -81,8 +83,7 @@ ROOT_URLCONF = 'cadpoint.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -267,3 +268,7 @@ else:
     # Конфигурация WhiteNoise для обслуживания статических файлов и файлов из /public (например,
     # robots.txt, favicon.ico и т.п.)
     WHITENOISE_ROOT = PUBLIC_DIR
+
+    # Защита куки сессий и CSRF от передачи по открытому HTTP
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
